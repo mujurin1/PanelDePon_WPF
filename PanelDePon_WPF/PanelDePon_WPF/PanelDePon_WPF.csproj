@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>PanelDePon_WPF</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Prism.DryIoc" Version="8.0.0.1909" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PanelDePon_WPF.Core\PanelDePon_WPF.Core.csproj" />
+    <ProjectReference Include="..\Modules\PanelDePon_WPF.Modules.ModuleName\PanelDePon_WPF.Modules.ModuleName.csproj" />
+    <ProjectReference Include="..\Services\PanelDePon_WPF.Services.Interfaces\PanelDePon_WPF.Services.Interfaces.csproj" />
+    <ProjectReference Include="..\Services\PanelDePon_WPF.Services\PanelDePon_WPF.Services.csproj" />
+  </ItemGroup>
+</Project>
