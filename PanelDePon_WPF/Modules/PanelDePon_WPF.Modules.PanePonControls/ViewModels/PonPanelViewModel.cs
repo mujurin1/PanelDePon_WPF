@@ -12,9 +12,13 @@ using System.Windows.Shapes;
 
 namespace PanelDePon_WPF.Modules.PanePonControls.ViewModels
 {
-    public class SquareCellViewModel : BindableBase
+    public class PonPanelViewModel : BindableBase
     {
-        public SquareCellViewModel()
+        public Rectangle Rect { get; set; }
+
+        public ReactivePropertySlim<double> Size { get; set; } = new(20);
+
+        public PonPanelViewModel()
         {
         }
     }

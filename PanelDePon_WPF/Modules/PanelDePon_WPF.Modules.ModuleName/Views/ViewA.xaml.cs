@@ -26,21 +26,6 @@ namespace PanelDePon_WPF.Modules.ModuleName.Views
         {
             // 不要説 http://ex.osaka-kyoiku.ac.jp/~fujii/WPF/Anime.html
             InitializeComponent();
-
-            var square = new SquareCell(40, 40);
-
-            GameArea.Children.Add(square);
-            Task.Run(async () => {
-                int wait = 1000;
-                await Task.Delay(wait);
-                this.Dispatcher.Invoke(() => square.CanvasLeft += 20);
-                await Task.Delay(wait);
-                this.Dispatcher.Invoke(() => square.CanvasLeft += 20);
-                await Task.Delay(wait);
-                this.Dispatcher.Invoke(() => square.CanvasLeft += 40);
-                await Task.Delay(wait);
-                this.Dispatcher.Invoke(() => square.CanvasTop -= 20);
-            });
         }
     }
 }

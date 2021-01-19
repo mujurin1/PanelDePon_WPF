@@ -29,6 +29,21 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         /// </summary>
         private Dictionary<(string, double), Storyboard> _storyboardCache = new();
 
+        private int _viewRatio = 1;
+        /// <summary>
+        ///   表示倍率
+        /// </summary>
+        public int ViewRatio {
+            get => _viewRatio;
+            set {
+                _viewRatio = value;
+                Width = BaseWidth * ViewRatio;
+                Height = BaseHeight * ViewRatio;
+            }
+        }
+        public int BaseWidth => 30;
+        public int BaseHeight => 30;
+
         public double CanvasLeft {
             get => Canvas.GetLeft(this);
             set {

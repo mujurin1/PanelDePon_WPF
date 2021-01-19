@@ -12,5 +12,7 @@
              prism:ViewModelLocator.AutoWireViewModel="True" >
   <Canvas x:Name="GameArea"
           Width="180" Height="360"
-          Background="Silver"/>
+          Background="Silver">
+    <views:PonPanel/>
+  </Canvas>
 </UserControl>

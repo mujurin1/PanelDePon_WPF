@@ -8,7 +8,7 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              Width="{Binding Size.Value}" Height="{Binding Size.Value}">
-  <Rectangle x:Name="Panel"
+  <Rectangle x:Name="SquareCellPanel"
              Fill="Aqua" Stroke="SkyBlue">
   </Rectangle>
 </UserControl>
