@@ -27,66 +27,48 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         /// <summary>
         ///   何度も同じストーリーボードを生成するのは無駄なので、キャッシュをしよう
         /// </summary>
-        private Dictionary<(string, double), Storyboard> _storyboardCache = new();
-
-        /// <summary>
-        ///   表示倍率。いいねぇ！
-        /// </summary>
-        public double Scare {
-            get => PazzleCell.Scale;
-            set => PazzleCell.Scale = value;
-        }
-        public override int BaseWidth => 30;
-        public override int BaseHeight => 30;
+        private readonly Dictionary<(string, double), Storyboard> _storyboardCache = new();
+        /// <summary>アニメーション速度</summary>
+        private readonly static TimeSpan AnimeSpeed = TimeSpan.FromMilliseconds(100);
 
         public double CanvasLeft {
             get => Canvas.GetLeft(this);
             set {
                 Animation(left: value - Canvas.GetLeft(this));
-                //SetValue(Canvas.LeftProperty, value);
-                //Canvas.SetLeft(this, value);
             }
         }
         public double CanvasTop {
             get => Canvas.GetTop(this);
             set {
                 Animation(top: value - Canvas.GetTop(this));
-                //SetValue(Canvas.TopProperty, value);
-                //Canvas.SetTop(this, value);
             }
         }
 
         public PazzleCell(double left = 0, double top = 0) : base()
         {
             InitializeComponent();
-
-            // 下の値が設定されてないと例外が出るので初期値指定（しかも気が付きにくいエラー…）
-            //Canvas.SetLeft(this, left);
-            //Canvas.SetTop(this, top);
-            // 何故かここで値をセットしないと正しく動かない。ことはなかった
             CanvasLeft = left;
             CanvasTop = top;
         }
 
         /// <summary>
-        ///   <para>四角形を動かす。移動量は value * 20</para>
-        ///   <para>X,Y 2つとも動くことはないので、両方値が入っている場合Xを動かす</para>
+        ///   <para>自分の位置をCanvas座標で動かす</para>
+        ///   <para>Left,Top が同時に動くことはないので、両方値が入っている場合Leftを動かす</para>
         /// </summary>
         /// <param name="left"></param>
         /// <param name="top"></param>
         private void Animation(double left = 0, double top = 0)
         {
             (string, double) animeInfo = (left, top) switch {
-                (0, 0) => (null, double.NaN),
+                (0, 0) => (null, double.NaN),       // 移動量なし
                 (_, 0) => ("(Canvas.Left)", left),
                 (0, _) => ("(Canvas.Top)", top),
-                _ => (null, double.NaN)             // ここには絶対来ないけどね…
+                _ => throw new Exception($"PazzleCell Animation: Left, Top の値が不正です\nLeft {left}  Top{top}")  // NaNのまま進むとアニメーションで例外になるので
             };
-            // 移動量なし
+            
             if(animeInfo.Item1 is null) return;
-            Storyboard storyboard;
             // このアニメーションのストーリーは初めて
-            if(!_storyboardCache.TryGetValue(animeInfo, out storyboard)) {
+            if(!_storyboardCache.TryGetValue(animeInfo, out Storyboard storyboard)) {
                 // ストーリーボード作成
                 storyboard = new Storyboard();
                 storyboard.Children.Add(CreateAnimation(animeInfo));
@@ -115,16 +97,9 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             Storyboard.SetTarget(anime, this);
             Storyboard.SetTargetProperty(anime, new PropertyPath(propertyPath));
             anime.By = value;
-            anime.Duration = TimeSpan.FromMilliseconds(100);
+            anime.Duration = AnimeSpeed;
 
             return anime;
-        }
-
-        protected override void ChangeScale(double old)
-        {
-            Debug.WriteLine($"Scare {Scare}");
-            CanvasLeft *= Scare;
-            CanvasTop *= Scare;
         }
     }
 }

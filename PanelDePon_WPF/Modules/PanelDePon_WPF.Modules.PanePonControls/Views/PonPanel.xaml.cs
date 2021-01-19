@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PanelDePon_WPF.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -21,36 +22,32 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
     /// </summary>
     public partial class PonPanel : PanePonControlAbs
     {
+        private int _columns = 6;
         /// <summary>
-        ///   表示倍率
+        ///   横列のパズルセルの数
         /// </summary>
-        public double Scare {
-            get => PonPanel.Scale;
-            set => PonPanel.Scale = value;
+        public int Columns {
+            get => _columns;
+            set {
+                _columns = value;
+                Width = CellSize * Columns;
+            }
         }
-        public override int BaseWidth => 180;
-        public override int BaseHeight => 360;
+        private int _rows = 12;
+        /// <summary>
+        ///   縦列のパズルセルの数
+        /// </summary>
+        public int Rows {
+            get => _rows;
+            set {
+                _rows = value;
+                Height = CellSize * Rows;
+            }
+        }
 
         public PonPanel() : base()
         {
             InitializeComponent();
-
-            var cell = new PazzleCell(1, 1);
-            PanePonPanel.Children.Add(cell);
-            Task.Run(async () => {
-                var wait = 1000;
-                await Task.Delay(wait);
-                Dispatcher.Invoke(() => PanePonControlAbs.Scale *= 1.5);
-                await Task.Delay(wait);
-                Dispatcher.Invoke(() => cell.CanvasLeft += 20);
-            });
-        }
-
-        protected override void ChangeScale(double old)
-        {
-            Width = BaseWidth * Scare;
-            Height = BaseHeight * Scare;
-            
         }
     }
 }

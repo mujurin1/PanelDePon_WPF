@@ -8,7 +8,7 @@ namespace PanelDePon_WPF.Modules.ModuleName.ViewModels
     public class ViewAViewModel : RegionViewModelBase
     {
 
-        public ViewAViewModel(IRegionManager regionManager, IMessageService messageService) :
+        public ViewAViewModel(IRegionManager regionManager) :
             base(regionManager)
         {
         }

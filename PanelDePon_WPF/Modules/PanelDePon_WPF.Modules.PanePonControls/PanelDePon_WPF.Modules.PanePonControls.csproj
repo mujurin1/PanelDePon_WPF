@@ -8,4 +8,7 @@
     <PackageReference Include="Prism.Wpf" Version="8.0.0.1909" />
     <PackageReference Include="ReactiveProperty.WPF" Version="7.6.1" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Services\PanelDePon_WPF.Services.Interfaces\PanelDePon_WPF.Services.Interfaces.csproj" />
+  </ItemGroup>
 </Project>

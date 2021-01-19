@@ -1,16 +1,13 @@
-﻿using System;
+﻿using PanelDePon_WPF.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PanelDePon_WPF.Services.Interfaces
+namespace PanelDePon_WPF.Services
 {
-    /// <summary>
-    ///   <para>パネポンのプレイエリアインターフェース</para>
-    ///   <pane>セルがあるパネルと、セルのインターフェース</pane>
-    /// </summary>
-    public interface IPanePonPanelService
+    public class PanePonPanelService : IPanePonPanelService
     {
         /// <summary>セルの横列数</summary>
         public int CellColumns { get; set; }
@@ -22,5 +19,11 @@ namespace PanelDePon_WPF.Services.Interfaces
         public object PazzleCellDesign { get; set; }
         /// <summary>お邪魔セルのデザイン。まだないので予約</summary>
         public object OjamaCellDesign { get; set; }
+
+        public PanePonPanelService(int col, int row)
+        {
+            this.CellColumns = col;
+            this.CellRows = row;
+        }
     }
 }
