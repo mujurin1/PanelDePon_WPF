@@ -10,9 +10,5 @@
              mc:Ignorable="av"
              x:Class="PanelDePon_WPF.Modules.ModuleName.Views.ViewA"
              prism:ViewModelLocator.AutoWireViewModel="True" >
-  <Canvas x:Name="GameArea"
-          Width="180" Height="360"
-          Background="Silver">
-    <views:PonPanel/>
-  </Canvas>
+  <views:PonPanel/>
 </UserControl>

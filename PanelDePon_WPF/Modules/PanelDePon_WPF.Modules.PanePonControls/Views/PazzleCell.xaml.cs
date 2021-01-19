@@ -19,26 +19,26 @@ using System.Windows.Shapes;
 namespace PanelDePon_WPF.Modules.PanePonControls.Views
 {
     /// <summary>
-    ///   <para>スムーズに動く四角形</para>
-    ///   <para>Canvas.xxは使用禁止</para>
+    ///   <para>パネポンの動かして消すセル</para>
+    ///   <para>Canvas.Left 等は使用禁止</para>
     /// </summary>
-    public partial class SquareCell : UserControl
+    public partial class PazzleCell : UserControl
     {
         /// <summary>
         ///   何度も同じストーリーボードを生成するのは無駄なので、キャッシュをしよう
         /// </summary>
         private Dictionary<(string, double), Storyboard> _storyboardCache = new();
 
-        private int _viewRatio = 1;
+        private int _scale = 1;
         /// <summary>
-        ///   表示倍率
+        ///   表示倍率。いいねぇ！
         /// </summary>
-        public int ViewRatio {
-            get => _viewRatio;
+        public int Scare {
+            get => _scale;
             set {
-                _viewRatio = value;
-                Width = BaseWidth * ViewRatio;
-                Height = BaseHeight * ViewRatio;
+                _scale = value;
+                Width = BaseWidth * Scare;
+                Height = BaseHeight * Scare;
             }
         }
         public int BaseWidth => 30;
@@ -61,9 +61,10 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             }
         }
 
-        public SquareCell(double left = 0, double top = 0)
+        public PazzleCell(double left = 0, double top = 0)
         {
             InitializeComponent();
+            this.Scare = 1;
 
             // 下の値が設定されてないと例外が出るので初期値指定（しかも気が付きにくいエラー…）
             Canvas.SetLeft(this, left);
@@ -92,7 +93,6 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             Storyboard storyboard;
             // このアニメーションのストーリーは初めて
             if(!_storyboardCache.TryGetValue(animeInfo, out storyboard)) {
-                Debug.WriteLine("ストーリーボード作成");
                 // ストーリーボード作成
                 storyboard = new Storyboard();
                 storyboard.Children.Add(CreateAnimation(animeInfo));
@@ -101,7 +101,6 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             }
 
             // アニメーションを開始します
-            Debug.WriteLine("アニメーション");
             storyboard.Begin();
         }
 

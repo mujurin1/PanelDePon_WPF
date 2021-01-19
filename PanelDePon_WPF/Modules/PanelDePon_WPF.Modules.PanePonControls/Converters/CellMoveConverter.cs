@@ -17,13 +17,13 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Converters
         /// <summary>
         ///   この値に基づいてトリガーを起動する
         /// </summary>
-        private SquareCell _squareCell;
+        private PazzleCell _squareCell;
         /// <summary>
         ///   この値が条件を満たすかを調べる
         /// </summary>
         private Func<double> _inspection;
 
-        public CellMoveConverter(SquareCell squareCell, Func<double> inspection)
+        public CellMoveConverter(PazzleCell squareCell, Func<double> inspection)
         {
             this._squareCell = squareCell;
             this._inspection = inspection;

@@ -17,38 +17,29 @@ using System.Windows.Shapes;
 namespace PanelDePon_WPF.Modules.PanePonControls.Views
 {
     /// <summary>
-    /// PonPanel.xaml の相互作用ロジック
+    ///   <pane>パネポンのパズルを表示するエリア</pane>
     /// </summary>
     public partial class PonPanel : UserControl
     {
-        private int _viewRatio = 1;
+        private int _scare = 1;
         /// <summary>
         ///   表示倍率
         /// </summary>
-        public int ViewRatio {
-            get => _viewRatio;
+        public int Scare {
+            get => _scare;
             set {
-                _viewRatio = value;
-                Width = BaseWidth * ViewRatio;
-                Height = BaseHeight * ViewRatio;
+                _scare = value;
+                Width = BaseWidth * Scare;
+                Height = BaseHeight * Scare;
             }
         }
-        public int BaseWidth => 30;
-        public int BaseHeight => 30;
+        public int BaseWidth => 180;
+        public int BaseHeight => 360;
 
         public PonPanel()
         {
             InitializeComponent();
-
-            var square = new SquareCell(30, 30);
-            PanePonPanel.Children.Add(square);
-            Debug.WriteLine($"Left {Canvas.GetLeft(square)}  Top { Canvas.GetTop(square)}");
-
-            Task.Run(async () => {
-                var wait = 1000;
-                await Task.Delay(wait);
-                Dispatcher.Invoke(() => square.CanvasLeft += 30);
-            });
+            this.Scare = 1;
         }
     }
 }

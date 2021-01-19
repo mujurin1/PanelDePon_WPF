@@ -8,25 +8,25 @@
 
 気になるのが、下の方法ができるか
 
-abstract class AbsA
-{
+abstract class AbsA{
     // staic !!!!
     protected static int BaseValue = 10;
 }
 
-class ClassA : AbsA
-{
-    void ViewBaseValue() => cw(Base.BaseValue);
-    void ChangeBaseValue() => Base.BaseValue = 30;
+class ClassA : AbsA{
+    void ViewBaseValue() => cw(ClassA.BaseValue);
+    void ChangeBaseValue() => ClassA.BaseValue = 30;
 }
-class ClassB : AbsA
-{
-    void ViewBaseValue() => cw(Base.BaseValue);
+class ClassB : AbsA{
+    void ViewBaseValue() => cw(ClassB.BaseValue);
 }
 
 var a = new ClassA();
 var b = new ClassB();
 a.ChangeBaseValue();
 a.ViewBaseValue(); // <= たぶん３０
-b.ViewBaseValue(); // <= ほんとに３０になる？
+b.ViewBaseValue(); // <= ほんとに３０になりました１！！！！
 
+共通抽象クラスを作るなら、Baseコンストラクタで表示の初期化をしておく
+this.Width = ..; this.Height = ..;
+でないと表示されない(0)から
