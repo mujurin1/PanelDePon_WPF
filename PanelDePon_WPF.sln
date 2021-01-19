@@ -17,7 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PanelDePon_WPF", "PanelDePo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PanelDePon_WPF.Core", "PanelDePon_WPF\PanelDePon_WPF.Core\PanelDePon_WPF.Core.csproj", "{86F624E7-814C-468F-A30A-ACD08E31A1E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PanelDePon_WPF.Modules.PanePonControls", "PanelDePon_WPF\Modules\PanelDePon_WPF.Modules.PanePonControls\PanelDePon_WPF.Modules.PanePonControls.csproj", "{3F869FFE-9485-4037-9368-62801B498D68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PanelDePon_WPF.Modules.PanePonControls", "PanelDePon_WPF\Modules\PanelDePon_WPF.Modules.PanePonControls\PanelDePon_WPF.Modules.PanePonControls.csproj", "{3F869FFE-9485-4037-9368-62801B498D68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PanelDePon_Game", "PanelDePon_Game\PanelDePon_Game.csproj", "{697ED384-2C7D-4F30-B9F4-C6C2E8197AD5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,10 @@ Global
 		{3F869FFE-9485-4037-9368-62801B498D68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F869FFE-9485-4037-9368-62801B498D68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F869FFE-9485-4037-9368-62801B498D68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{697ED384-2C7D-4F30-B9F4-C6C2E8197AD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{697ED384-2C7D-4F30-B9F4-C6C2E8197AD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{697ED384-2C7D-4F30-B9F4-C6C2E8197AD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{697ED384-2C7D-4F30-B9F4-C6C2E8197AD5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
