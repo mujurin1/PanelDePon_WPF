@@ -21,10 +21,5 @@ namespace PanelDePon_WPF.Modules.PanePonControls.ViewModels
         public SquareCellViewModel()
         {
         }
-
-        public void MoveAnimation(object sender, EventArgs e)
-        {
-        }
-
     }
 }

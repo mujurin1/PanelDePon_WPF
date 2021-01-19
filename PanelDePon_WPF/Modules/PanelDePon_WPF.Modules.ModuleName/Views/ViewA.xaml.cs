@@ -28,18 +28,16 @@ namespace PanelDePon_WPF.Modules.ModuleName.Views
             InitializeComponent();
 
             var square = new SquareCell(40, 40);
-            //Canvas.SetLeft(square, 40);
-            //Canvas.SetTop(square, 40);
 
             GameArea.Children.Add(square);
             Task.Run(async () => {
-                int wait = 200;
+                int wait = 1000;
                 await Task.Delay(wait);
                 this.Dispatcher.Invoke(() => square.CanvasLeft += 20);
                 await Task.Delay(wait);
                 this.Dispatcher.Invoke(() => square.CanvasLeft += 20);
                 await Task.Delay(wait);
-                this.Dispatcher.Invoke(() => square.CanvasTop -= 20);
+                this.Dispatcher.Invoke(() => square.CanvasLeft += 40);
                 await Task.Delay(wait);
                 this.Dispatcher.Invoke(() => square.CanvasTop -= 20);
             });
