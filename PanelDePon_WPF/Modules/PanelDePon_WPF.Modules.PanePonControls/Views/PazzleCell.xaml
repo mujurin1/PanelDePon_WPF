@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="PanelDePon_WPF.Modules.PanePonControls.Views.PazzleCell"
+﻿<local:PanePonControlAbs x:Class="PanelDePon_WPF.Modules.PanePonControls.Views.PazzleCell"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:PanelDePon_WPF.Modules.PanePonControls.Views"
@@ -11,4 +11,4 @@
   <Rectangle x:Name="SquareCellPanel"
              Fill="Aqua" Stroke="SkyBlue">
   </Rectangle>
-</UserControl>
+</local:PanePonControlAbs>

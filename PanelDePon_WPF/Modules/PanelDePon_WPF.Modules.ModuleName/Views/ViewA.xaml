@@ -9,6 +9,6 @@
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="av"
              x:Class="PanelDePon_WPF.Modules.ModuleName.Views.ViewA"
-             prism:ViewModelLocator.AutoWireViewModel="True" >
+             prism:ViewModelLocator.AutoWireViewModel="True">
   <views:PonPanel/>
 </UserControl>

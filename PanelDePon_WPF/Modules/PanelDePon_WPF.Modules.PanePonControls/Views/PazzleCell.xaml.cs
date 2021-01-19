@@ -22,27 +22,22 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
     ///   <para>パネポンの動かして消すセル</para>
     ///   <para>Canvas.Left 等は使用禁止</para>
     /// </summary>
-    public partial class PazzleCell : UserControl
+    public partial class PazzleCell : PanePonControlAbs
     {
         /// <summary>
         ///   何度も同じストーリーボードを生成するのは無駄なので、キャッシュをしよう
         /// </summary>
         private Dictionary<(string, double), Storyboard> _storyboardCache = new();
 
-        private int _scale = 1;
         /// <summary>
         ///   表示倍率。いいねぇ！
         /// </summary>
-        public int Scare {
-            get => _scale;
-            set {
-                _scale = value;
-                Width = BaseWidth * Scare;
-                Height = BaseHeight * Scare;
-            }
+        public double Scare {
+            get => PazzleCell.Scale;
+            set => PazzleCell.Scale = value;
         }
-        public int BaseWidth => 30;
-        public int BaseHeight => 30;
+        public override int BaseWidth => 30;
+        public override int BaseHeight => 30;
 
         public double CanvasLeft {
             get => Canvas.GetLeft(this);
@@ -61,17 +56,16 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             }
         }
 
-        public PazzleCell(double left = 0, double top = 0)
+        public PazzleCell(double left = 0, double top = 0) : base()
         {
             InitializeComponent();
-            this.Scare = 1;
 
             // 下の値が設定されてないと例外が出るので初期値指定（しかも気が付きにくいエラー…）
-            Canvas.SetLeft(this, left);
-            Canvas.SetTop(this, top);
+            //Canvas.SetLeft(this, left);
+            //Canvas.SetTop(this, top);
             // 何故かここで値をセットしないと正しく動かない。ことはなかった
-            //CanvasLeft = left;
-            //CanvasTop = top;
+            CanvasLeft = left;
+            CanvasTop = top;
         }
 
         /// <summary>
@@ -124,6 +118,13 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             anime.Duration = TimeSpan.FromMilliseconds(100);
 
             return anime;
+        }
+
+        protected override void ChangeScale(double old)
+        {
+            Debug.WriteLine($"Scare {Scare}");
+            CanvasLeft *= Scare;
+            CanvasTop *= Scare;
         }
     }
 }

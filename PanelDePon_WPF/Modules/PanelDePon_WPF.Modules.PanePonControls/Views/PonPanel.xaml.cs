@@ -19,27 +19,38 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
     /// <summary>
     ///   <pane>パネポンのパズルを表示するエリア</pane>
     /// </summary>
-    public partial class PonPanel : UserControl
+    public partial class PonPanel : PanePonControlAbs
     {
-        private int _scare = 1;
         /// <summary>
         ///   表示倍率
         /// </summary>
-        public int Scare {
-            get => _scare;
-            set {
-                _scare = value;
-                Width = BaseWidth * Scare;
-                Height = BaseHeight * Scare;
-            }
+        public double Scare {
+            get => PonPanel.Scale;
+            set => PonPanel.Scale = value;
         }
-        public int BaseWidth => 180;
-        public int BaseHeight => 360;
+        public override int BaseWidth => 180;
+        public override int BaseHeight => 360;
 
-        public PonPanel()
+        public PonPanel() : base()
         {
             InitializeComponent();
-            this.Scare = 1;
+
+            var cell = new PazzleCell(1, 1);
+            PanePonPanel.Children.Add(cell);
+            Task.Run(async () => {
+                var wait = 1000;
+                await Task.Delay(wait);
+                Dispatcher.Invoke(() => PanePonControlAbs.Scale *= 1.5);
+                await Task.Delay(wait);
+                Dispatcher.Invoke(() => cell.CanvasLeft += 20);
+            });
+        }
+
+        protected override void ChangeScale(double old)
+        {
+            Width = BaseWidth * Scare;
+            Height = BaseHeight * Scare;
+            
         }
     }
 }
