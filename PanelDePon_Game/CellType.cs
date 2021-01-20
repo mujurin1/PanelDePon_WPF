@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PanelDePon_Game.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace PanelDePon_Game
     {
         /// <summary>セルの種類</summary>
         public CellType CellType;
-        /// <summary>お邪魔セルの部位。お邪魔じゃないなら０</summary>
+        /// <summary>お邪魔セルの部位。お邪魔じゃないなら NaN</summary>
         public OjamaPart OjamaPart;
         /// <summary>セルの状態。動、落</summary>
         public CellState State;
@@ -25,6 +26,15 @@ namespace PanelDePon_Game
         ///   セルの次の情報。nフレーム後にこの情報に更新
         /// </summary>
         public CellState NextState;
+
+        /// <summary>
+        ///   <para>CellType列挙型の、普通のセルの数</para>
+        ///   <para>びっくりマークのセルを含まないのでマイナス１</para>
+        ///   <para>CellType列挙型に強く依存するので、CellType列挙型の変更に注意する</para>
+        /// </summary>
+        private static int NormalCellTypes = Enum.GetValues<CellType>()
+                                                 .Select(e => (int)e)
+                                                 .Where(n => (n & 0x10) == 0x10).Count() -1;
 
         /// <summary>
         ///   １フレーム経過
@@ -41,66 +51,22 @@ namespace PanelDePon_Game
             // フレームを１経過させる
             WaitFrame--;
         }
+
+        private static Random _random = new Random();
+        /// <summary>
+        ///   <para>ランダムなセルを生成する</para>
+        ///   <para>普通のセルのみ生成される</para>
+        /// </summary>
+        public static CellInfo Random()
+        {
+            /* 生成されるセル
+             * 普通のセルの条件：5bit目が1
+             * CellType 0x10 ~ 0x14 (16 ~ 20)
+             */
+            return new CellInfo() {
+                CellType = (CellType)_random.Next(0x10, 0x10+NormalCellTypes)
+            };
+        }
     }
 
-    /// <summary>
-    ///   <para>セルの種類</para>
-    ///   <para>空白：0x00</para>
-    ///   <para>普通のセル：5bit目が１</para>
-    ///   <para>お邪魔：0x01 OR 0x02</para>
-    /// </summary>
-    public enum CellType
-    {
-        // 空白
-        NaN       = 0x00,   // 0
-        // 普通のセル
-        Red       = 0x10,   // 16
-        Blue      = 0x11,   // 17
-        Sky       = 0x12,   // 18
-        Yellow    = 0x13,   // 19
-        Green     = 0x14,   // 20
-        // ハテナ？
-        Hatena    = 0x1F,   // 31
-        // お邪魔
-        Ojama     = 0x01,   // 1
-        // ハードお邪魔
-        HardOjama = 0x02    // 2
-    }
-    /// <summary>
-    ///   セルの状態
-    /// </summary>
-    [Flags]
-    public enum CellState
-    {
-        Shift = 1,          // 動かせる
-        Fall  = 1 << 1,     // 落下可能
-    }
-    /// <summary>
-    ///   お邪魔だった場合、お邪魔のどの位置か
-    /// </summary>
-    public enum OjamaPart
-    {
-        NaN  = 0x00,    // お邪魔じゃない
-        // １列のお邪魔
-        One1 = 0x11,    // 左端
-        One2 = 0x12,    // 中
-        One3 = 0x13,    // 右端
-        // ２列のお邪魔
-        Two1 = 0x21,    // 左上
-        Two2 = 0x22,    // 中上 32
-        Two3 = 0x23,    // 右上
-        Two4 = 0x24,    // 左下
-        Two5 = 0x25,    // 中下 38
-        Two6 = 0x26,    // 右下
-        // ３列のお邪魔
-        Thr1 = 0x31,    // 左上角
-        Thr2 = 0x32,    // 中上 22
-        Thr3 = 0x33,    // 右上角
-        Thr4 = 0x34,    // 左
-        Thr5 = 0x35,    // 中心
-        Thr6 = 0x36,    // 右
-        Thr7 = 0x37,    // 左下角
-        Thr8 = 0x38,    // 中下 25
-        Thr9 = 0x39,    // 右下角
-    }
 }

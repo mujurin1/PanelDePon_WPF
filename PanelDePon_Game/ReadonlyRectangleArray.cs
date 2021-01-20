@@ -8,8 +8,8 @@ namespace PanelDePon_Game
     {
         protected T[,] _array;
 
-        public int Rows => _array.GetLength(0);
-        public int Columns => _array.GetLength(1);
+        public int Row => _array.GetLength(0);
+        public int Column => _array.GetLength(1);
 
         protected ReadonlyRectangleArray() { }
 

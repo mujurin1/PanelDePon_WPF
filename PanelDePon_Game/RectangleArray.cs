@@ -6,9 +6,9 @@ namespace PanelDePon_Game
 {
     public class RectangleArray<T> : ReadonlyRectangleArray<T>
     {
-        public RectangleArray(int rows, int cols)
+        public RectangleArray(int row, int col)
         {
-            this._array = new T[rows, cols];
+            this._array = new T[row, col];
         }
 
         /// <summary>
