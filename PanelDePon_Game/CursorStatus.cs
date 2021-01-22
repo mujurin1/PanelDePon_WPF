@@ -13,7 +13,9 @@ namespace PanelDePon_Game
     /// </summary>
     public record CursorStatus
     {
-        /// <summary>プレイエリアサイズ</summary>
+        /// <summary>
+        ///   <para>プレイエリアサイズ（カーソルが存在出来る範囲）</para>
+        /// </summary>
         public AreaSize PlayAreaSize;
         /// <summary>
         ///   <para>カーソルの位置（左側）</para>
@@ -63,7 +65,7 @@ namespace PanelDePon_Game
                 throw new NotImplementedException("ユーザーの操作例外。クリックしてセルを入れ替える処理はまだ実装していません。がんばって");
             default:
                 throw new ArgumentException($"ユーザーの操作系以外の値が渡されました。入力された値：{userOperation}",
-                                            "userOperation");
+                                             nameof(userOperation));
             }
         }
 

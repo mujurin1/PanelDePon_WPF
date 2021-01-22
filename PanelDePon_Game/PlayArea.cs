@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 
 namespace PanelDePon_Game
 {
-    public class Class1
+    public class PlayArea
     {
         /// <summary>
         ///   <para>セルの情報を格納した配列</para>
@@ -13,14 +13,13 @@ namespace PanelDePon_Game
         ///   <para>左下が row:0 col:0 で右上に行くほど増加</para>
         /// </summary>
         private RectangleArray<CellInfo> _cellArray;
-        /// <summary>セルの情報を格納した配列。読み取り専用</summary>
-        public ReadonlyRectangleArray<CellInfo> CellArray;
+        /// <summary>_cellArrayの公開用。値型のプロパティなので、変更は不可能</summary>
+        public RectangleArray<CellInfo> CellArray => _cellArray;
 
         /// <summary>経過フレーム数</summary>
         public int ElapseFrame { get; set; } = 0;
         /// <summary>プレイエリアのサイズ</summary>
         public AreaSize PlayAreaSize { get; private set; }
-        
 
         /* スクロールをするかどうかメモ
          * 
@@ -47,14 +46,13 @@ namespace PanelDePon_Game
         /// </summary>
         public CursorStatus CursorStatus { get; private set; }
 
-        public Class1(int row, int col)
+        public PlayArea(int row, int col)
         {
             this.PlayAreaSize = new AreaSize(row, col);
             // セルの存在する２次元配列
             // rows（縦列）はお邪魔が降って来て画面上範囲外にセルが存在するので、1.5倍にして、
             // 　　　　　　　一番下はせり上がる列なので更に＋１
             this._cellArray = new RectangleArray<CellInfo>((int)(row*1.5) + 1, col);
-            this.CellArray = _cellArray;
             this.CursorStatus = new CursorStatus(PlayAreaSize);
             StartGame();
         }
@@ -79,7 +77,7 @@ namespace PanelDePon_Game
         /// <param name="cursorOperation">カーソルの操作</param>
         public void UpdateFrame(UserOperation cursorOperation)
         {
-
+            GameRule(cursorOperation);
         }
 
         /* プレイエリアのセルの処理とか
@@ -106,13 +104,15 @@ namespace PanelDePon_Game
                 // TODO: スクロール速度が上昇する
                 break;
             }
-            // カーソルの移動系以外の操作だった場合に、カーソルの状態を更新する
+            // カーソルの移動系以外の操作だった場合に来る
+            // カーソルの状態を更新する
             CursorStatus.UpdateFrame();
 
             CursorUpdateCompleted:
 
 
             //---------スクロールする
+            // スクロール待機中なら、待機フレーム数を１減らしてスクロールしない
             if(_scrollWaitFrame > 0) {
                 _scrollWaitFrame--;
             } else {
