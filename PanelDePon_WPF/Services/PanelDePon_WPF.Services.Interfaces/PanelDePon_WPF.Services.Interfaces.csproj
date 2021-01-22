@@ -4,4 +4,9 @@
     <TargetFramework>net5.0-windows</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\PanelDePon\PanelDePon.PlayArea\PanelDePon.PlayArea.csproj" />
+    <ProjectReference Include="..\..\..\PanelDePon\PanelDePon.Types\PanelDePon.Types.csproj" />
+  </ItemGroup>
+
 </Project>

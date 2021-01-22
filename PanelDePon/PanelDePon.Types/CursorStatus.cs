@@ -1,27 +1,26 @@
-﻿using PanelDePon_Game.Enums;
-using PanelDePon_Game.Lib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PanelDePon_Game
+namespace PanelDePon.Types
 {
     /// <summary>
     ///   ユーザーが操作するカーソルの状態
     /// </summary>
-    public record CursorStatus
+    public struct CursorStatus
     {
         /// <summary>
         ///   <para>プレイエリアサイズ（カーソルが存在出来る範囲）</para>
         /// </summary>
         public AreaSize PlayAreaSize;
+        private AreaSizeRange _cursorPos;
         /// <summary>
         ///   <para>カーソルの位置（左側）</para>
         ///   <para>左下が row:0 col:0 で右上に行くほど増加</para>
         /// </summary>
-        public AreaSizeRange CursorPos { get; private set; }
+        public AreaSizeRange CursorPos => _cursorPos;
         /// <summary>
         ///   <para>この値が０なら、カーソルの操作や入れ替えができる</para>
         ///   <para>０でないなら１フレーム毎にマイナス１</para>
@@ -33,7 +32,8 @@ namespace PanelDePon_Game
             this.PlayAreaSize = playAreaSize;
             // カーソルは、プレイエリアの横列-1の範囲にしか存在しないため
             playAreaSize.Column--;
-            this.CursorPos = new AreaSizeRange(playAreaSize);
+            this._cursorPos = new AreaSizeRange(playAreaSize);
+            this.CursorWait = 0;
         }
 
         /// <summary>
@@ -50,22 +50,22 @@ namespace PanelDePon_Game
             }
             switch(userOperation) {
             case UserOperation.CursorUp:
-                CursorPos.Row++;
+                _cursorPos.Row++;
                 break;
             case UserOperation.CursorLeft:
-                CursorPos.Column--;
+                _cursorPos.Column--;
                 break;
             case UserOperation.CursorRight:
-                CursorPos.Column++;
+                _cursorPos.Column++;
                 break;
             case UserOperation.CursorDown:
-                CursorPos.Row--;
+                _cursorPos.Row--;
                 break;
             case UserOperation.ClickChangeCell:
                 throw new NotImplementedException("ユーザーの操作例外。クリックしてセルを入れ替える処理はまだ実装していません。がんばって");
             default:
                 throw new ArgumentException($"ユーザーの操作系以外の値が渡されました。入力された値：{userOperation}",
-                                             nameof(userOperation));
+                                            nameof(userOperation));
             }
         }
 

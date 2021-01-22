@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace PanelDePon_WPF.Modules.PanePonControls.ViewModels
 {
-    public class PazzleCellViewModel : BindableBase
+    public class PlayAreaPanelViewModel : BindableBase
     {
-
-        public PazzleCellViewModel(IRegionManager regionManager)
+        public PlayAreaPanelViewModel(IRegionManager regionManager)
         {
+            //this._panePonPalyAreaService = panePonPalyAreaService;
         }
     }
 }

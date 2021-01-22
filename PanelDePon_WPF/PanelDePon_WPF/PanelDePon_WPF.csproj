@@ -9,7 +9,9 @@
     <PackageReference Include="Prism.DryIoc" Version="8.0.0.1909" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\PanelDePon_Game\PanelDePon_Game.csproj" />
+    <ProjectReference Include="..\..\PanelDePon\PanelDePon.PlayArea\PanelDePon.PlayArea.csproj" />
+    <ProjectReference Include="..\..\PanelDePon\PanelDePon.Types\PanelDePon.Types.csproj" />
+    <ProjectReference Include="..\Modules\PanelDePon_WPF.Modules.PanePonControls\PanelDePon_WPF.Modules.PanePonControls.csproj" />
     <ProjectReference Include="..\PanelDePon_WPF.Core\PanelDePon_WPF.Core.csproj" />
     <ProjectReference Include="..\Modules\PanelDePon_WPF.Modules.ModuleName\PanelDePon_WPF.Modules.ModuleName.csproj" />
     <ProjectReference Include="..\Services\PanelDePon_WPF.Services.Interfaces\PanelDePon_WPF.Services.Interfaces.csproj" />

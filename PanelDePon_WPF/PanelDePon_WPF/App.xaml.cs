@@ -21,6 +21,7 @@ namespace PanelDePon_WPF
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterSingleton<IMessageService, MessageService>();
+            containerRegistry.RegisterSingleton<IPanelDePonPlayAreaService, PanelDePonPlayAreaServie>();
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

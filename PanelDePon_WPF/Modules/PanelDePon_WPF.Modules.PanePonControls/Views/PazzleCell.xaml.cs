@@ -1,4 +1,5 @@
-﻿using PanelDePon_WPF.Modules.PanePonControls.Converters;
+﻿using PanelDePon.Types;
+using PanelDePon_WPF.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,7 +23,7 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
     ///   <para>パネポンの動かして消すセル</para>
     ///   <para>Canvas.Left 等は使用禁止</para>
     /// </summary>
-    public partial class PazzleCell : PanePonControlAbs
+    public partial class PazzleCell : UserControl
     {
         /// <summary>
         ///   何度も同じストーリーボードを生成するのは無駄なので、キャッシュをしよう
@@ -30,6 +31,17 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         private readonly Dictionary<(string, double), Storyboard> _storyboardCache = new();
         /// <summary>アニメーション速度</summary>
         private readonly static TimeSpan AnimeSpeed = TimeSpan.FromMilliseconds(100);
+        private CellType _cell;
+        /// <summary>表示するセルの種類</summary>
+        public CellType Cell {
+            get => _cell;
+            set {
+                if(value is CellType.Empty)
+                    throw new ArgumentException("CellType.Empty を設定することはできません。", nameof(Cell));
+                _cell = value;
+                CellInit();
+            }
+        }
 
         public double CanvasLeft {
             get => Canvas.GetLeft(this);
@@ -37,35 +49,73 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
                 Animation(left: value - Canvas.GetLeft(this));
             }
         }
-        public double CanvasTop {
-            get => Canvas.GetTop(this);
+        public double CanvasBottom {
+            get => Canvas.GetBottom(this);
             set {
-                Animation(top: value - Canvas.GetTop(this));
+                Animation(bottom: value - Canvas.GetBottom(this));
             }
         }
 
-        public PazzleCell(double left = 0, double top = 0) : base()
+        public PazzleCell()
         {
             InitializeComponent();
-            CanvasLeft = left;
-            CanvasTop = top;
+            Canvas.SetLeft(this, 0);
+            Canvas.SetBottom(this, 0);
+            CanvasLeft = 0;
+            CanvasBottom = 0;
+            this.BorderBrush = Brushes.Black;
+        }
+
+        public PazzleCell(double left, double bottom) : this()
+        {
+            Canvas.SetLeft(this, left);
+            Canvas.SetBottom(this, bottom);
+        }
+
+        /// <summary>
+        ///   表示するセルの初期化
+        /// </summary>
+        private void CellInit()
+        {
+            Width = 30;
+            Height = 30;
+            switch(Cell) {
+            case CellType.Red:
+                this.Background = Brushes.Red;
+                break;
+            case CellType.Blue:
+                this.Background = Brushes.Blue;
+                break;
+            case CellType.Sky:
+                this.Background = Brushes.SkyBlue;
+                break;
+            case CellType.Yellow:
+                this.Background = Brushes.Yellow;
+                break;
+            case CellType.Green:
+                this.Background = Brushes.Green;
+                break;
+            case CellType.Bikkuri:
+                this.Background = Brushes.Silver;
+                break;
+            }
         }
 
         /// <summary>
         ///   <para>自分の位置をCanvas座標で動かす</para>
-        ///   <para>Left,Top が同時に動くことはないので、両方値が入っている場合Leftを動かす</para>
+        ///   <para>Left,Bottom が同時に動くことはないので、両方値が入っている場合Leftを動かす</para>
         /// </summary>
         /// <param name="left"></param>
-        /// <param name="top"></param>
-        private void Animation(double left = 0, double top = 0)
+        /// <param name="bottom"></param>
+        private void Animation(double left = 0, double bottom = 0)
         {
-            (string, double) animeInfo = (left, top) switch {
+            (string, double) animeInfo = (left, bottom) switch {
                 (0, 0) => (null, double.NaN),       // 移動量なし
                 (_, 0) => ("(Canvas.Left)", left),
-                (0, _) => ("(Canvas.Top)", top),
-                _ => throw new Exception($"PazzleCell Animation: Left, Top の値が不正です\nLeft {left}  Top{top}")  // NaNのまま進むとアニメーションで例外になるので
+                (0, _) => ("(Canvas.Bottom)", bottom),
+                _ => throw new Exception($"PazzleCell Animation: Left, Bottom の値が不正です\nLeft {left}  Bottom {bottom}")  // NaNのまま進むとアニメーションで例外になるので
             };
-            
+
             if(animeInfo.Item1 is null) return;
             // このアニメーションのストーリーは初めて
             if(!_storyboardCache.TryGetValue(animeInfo, out Storyboard storyboard)) {
@@ -83,6 +133,7 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
 
         private DoubleAnimation CreateAnimation((string, double) animeInfo)
             => CreateAnimation(animeInfo.Item1, animeInfo.Item2);
+
         /// <summary>
         ///   DoubleAnimation を生成して返す簡易メソッド
         /// </summary>

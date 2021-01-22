@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PanelDePon_Game.Lib
+namespace PanelDePon.Types
 {
     /// <summary>
     ///   Row（縦）Column（横）の２つの値を持つレコード
     /// </summary>
-    public record AreaSize
+    public struct AreaSize
     {
         public int Row;
         public int Column;
@@ -25,7 +25,7 @@ namespace PanelDePon_Game.Lib
     ///   <para>Row（縦）Column（横）の２つの値と、</para>
     ///   <para>Row、Column の上限、下限を持つレコード</para>
     /// </summary>
-    public record AreaSizeRange
+    public struct AreaSizeRange
     {
         private int _row;
         public int Row {

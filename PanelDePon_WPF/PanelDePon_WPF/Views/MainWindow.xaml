@@ -5,7 +5,7 @@
         prism:ViewModelLocator.AutoWireViewModel="True"
         xmlns:core="clr-namespace:PanelDePon_WPF.Core;assembly=PanelDePon_WPF.Core"
         Title="{Binding Title}" Height="600" Width="800">
-  <Grid Background="SkyBlue">
+  <Grid>
     <Viewbox>
       <ContentControl prism:RegionManager.RegionName="{x:Static core:RegionNames.ContentRegion}" />
     </Viewbox>

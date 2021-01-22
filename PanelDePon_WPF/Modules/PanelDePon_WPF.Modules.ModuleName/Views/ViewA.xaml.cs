@@ -24,7 +24,6 @@ namespace PanelDePon_WPF.Modules.ModuleName.Views
     {
         public ViewA()
         {
-            // 不要説 http://ex.osaka-kyoiku.ac.jp/~fujii/WPF/Anime.html
             InitializeComponent();
         }
     }

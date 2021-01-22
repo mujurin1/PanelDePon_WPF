@@ -1,9 +1,8 @@
-﻿using PanelDePon_Game.Enums;
-using PanelDePon_Game.Lib;
+﻿using PanelDePon.Types;
 using System;
 using System.Collections.ObjectModel;
 
-namespace PanelDePon_Game
+namespace PanelDePon.PlayArea
 {
     public class PlayArea
     {
@@ -17,8 +16,8 @@ namespace PanelDePon_Game
         public RectangleArray<CellInfo> CellArray => _cellArray;
 
         /// <summary>経過フレーム数</summary>
-        public int ElapseFrame { get; set; } = 0;
-        /// <summary>プレイエリアのサイズ</summary>
+        public int ElapseFrame { get; private set; } = 0;
+        /// <summary>プレイエリアの広さ。row, col</summary>
         public AreaSize PlayAreaSize { get; private set; }
 
         /* スクロールをするかどうかメモ
@@ -34,15 +33,15 @@ namespace PanelDePon_Game
          */
         /// <summary>スクロール待機フレーム数。０ならスクロールする</summary>
         private uint _scrollWaitFrame = 0;
-        /// <summary>スクロール上がる速度</summary>
-        public double UpSpeed { get; private set; }
+        /// <summary>スクロールする速度</summary>
+        public double UpSpeed { get; set; }
         /// <summary>せり上がっている今の高さ</summary>
         public double Border{ get; private set; }
         /// <summary>Border がこの値まで来たら、完全にセルが上に移動する</summary>
         private static double BorderLine => 10;
 
         /// <summary>
-        ///   ユーザーの入力と、カーソルの状態
+        ///   カーソルの状態
         /// </summary>
         public CursorStatus CursorStatus { get; private set; }
 
@@ -52,32 +51,42 @@ namespace PanelDePon_Game
             // セルの存在する２次元配列
             // rows（縦列）はお邪魔が降って来て画面上範囲外にセルが存在するので、1.5倍にして、
             // 　　　　　　　一番下はせり上がる列なので更に＋１
-            this._cellArray = new RectangleArray<CellInfo>((int)(row*1.5) + 1, col);
+            this._cellArray = new RectangleArray<CellInfo>((int)(row * 1.5) + 1, col);
+            //this._cellArray = new RectangleArray<CellInfo>((int)(row) + 1, col);
             this.CursorStatus = new CursorStatus(PlayAreaSize);
-            StartGame();
+            PlayAreaInit();
         }
 
         /// <summary>
-        ///   <para>ゲームエリアの状態を初期化する</para>
+        ///   <para>プレイエリアの状態を初期化する</para>
         /// </summary>
-        public void StartGame()
+        private void PlayAreaInit()
         {
             // セルの配置を初期化する
-            _cellArray = new RectangleArray<CellInfo>(_cellArray.Row, _cellArray.Column);
+            _cellArray.Reset(CellInfo.Empty);
             for(int row = -1; row <= 5; row++) {
                 for(int col = 0; col <= 5; col++) {
                     _cellArray[row, col] = CellInfo.Random();
                 }
             }
+
+            //// Debug用に、お邪魔セルを生成する
+            //var ojama = new CellInfo {
+            //    CellType = CellType.Ojama,
+            //};
+
+            // スクロール速度の初期化
+            // せり上がっている今の高さの初期化
+            // （まだフィールドすら無いけど）お邪魔の初期化
         }
 
         /// <summary>
         ///   プレイエリアを１フレーム分更新する
         /// </summary>
-        /// <param name="cursorOperation">カーソルの操作</param>
-        public void UpdateFrame(UserOperation cursorOperation)
+        /// <param name="userOperation">ユーザーの操作</param>
+        public void UpdateFrame(UserOperation userOperation)
         {
-            GameRule(cursorOperation);
+            GameRule(userOperation);
         }
 
         /* プレイエリアのセルの処理とか
@@ -131,5 +140,4 @@ namespace PanelDePon_Game
             // TODO: お邪魔セルを落下させる
         }
     }
-
 }

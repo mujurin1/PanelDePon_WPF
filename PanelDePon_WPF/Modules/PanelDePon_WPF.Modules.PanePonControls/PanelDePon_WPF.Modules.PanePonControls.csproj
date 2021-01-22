@@ -9,6 +9,13 @@
     <PackageReference Include="ReactiveProperty.WPF" Version="7.6.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\PanelDePon_WPF.Core\PanelDePon_WPF.Core.csproj" />
     <ProjectReference Include="..\..\Services\PanelDePon_WPF.Services.Interfaces\PanelDePon_WPF.Services.Interfaces.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\PazzleCell.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 </Project>
