@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Prism.DryIoc" Version="8.0.0.1909" />
+    <PackageReference Include="ReactiveProperty.WPF" Version="7.6.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\PanelDePon\PanelDePon.PlayArea\PanelDePon.PlayArea.csproj" />

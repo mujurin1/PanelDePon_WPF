@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Matrix = PanelDePon.Types.Matrix;
 
 namespace PanelDePon_WPF.Modules.PanePonControls.Views
 {
@@ -53,11 +54,13 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         private static readonly int CellSize = 30;
         /// <summary>カーソル</summary>
         private SwapCursor _cursor;
+        private Dictionary<Matrix, PazzleCell> _pazzleCells = new Dictionary<Matrix, PazzleCell>();
 
 
         public PlayAreaPanel()
         {
             InitializeComponent();
+            Canvas.SetBottom(PanePonCanvas, 0);
         }
 
         /// <summary>
@@ -66,7 +69,7 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         private void PlayAreaInit()
         {
             // フレーム更新時のイベントを追加
-            _panePonPlayAreaSerivce.Updated += (_, _) => Update();
+            _panePonPlayAreaSerivce.Updated += (object _, PlayAreaUpsateEventArgs e) => Update(e);
 
             // 画面サイズ変更
             Width = 30 * PlayAreaSerivce.PlayAreaSize.Column;
@@ -83,10 +86,10 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
                     // お邪魔セルは表示できないので 戻る
                     if(cell.CellType is CellType.Ojama or CellType.HardOjama) continue;
                     // セルコントロールを生成して、キャンバスに追加
-                    PanePonCanvas.Children.Add(
-                        new PazzleCell(col * CellSize, row * CellSize) {
-                            Cell = cell.CellType
-                        });
+                    var matrix = new Matrix(row, col);
+                    var cellP = new PazzleCell(matrix, cell.CellType);
+                    _pazzleCells.Add(matrix, cellP);
+                    PanePonCanvas.Children.Add(cellP);
                 }
             }
 
@@ -100,9 +103,27 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         /// <summary>
         ///   表示を更新する
         /// </summary>
-        private void Update()
+        private void Update(PlayAreaUpsateEventArgs update)
         {
+            Canvas.SetBottom(PanePonCanvas, (_panePonPlayAreaSerivce.ScrollLine / _panePonPlayAreaSerivce.BorderLine) * 30);
+            //Debug.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            Debug.WriteLine(update.SwapList.Count);
+            //foreach(var x in update.SwapList) {
+            //    Debug.WriteLine($"1  {x.Item1}");
+            //    Debug.WriteLine($"2  {x.Item2}");
+            //}
 
+
+            // 移動したセルを動かす
+            foreach(var set in update.SwapList) {
+                // set.1, set.2 のどちらかは_pazzleCellsにあるはず
+                if(_pazzleCells.TryGetValue(set.Item1, out PazzleCell cell)) {
+                    cell.Position = set.Item2;
+                }
+                if(_pazzleCells.TryGetValue(set.Item2, out cell)) {
+                    cell.Position = set.Item1;
+                }
+            }
 
             // カーソルの更新 ホントは最大でも片方しか動かないけど、これでいいや
             _cursor.CanvasLeft = PlayAreaSerivce.CursorStatus.CursorPos.Column * CellSize;

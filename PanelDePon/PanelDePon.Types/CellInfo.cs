@@ -45,7 +45,7 @@ namespace PanelDePon.Types
         ///   そのセルを入れ替え、落下させることは可能か？
         /// </summary>
         /// <returns>false:不可能　true:可能</returns>
-        public bool CanMove
+        public bool IsMove
             => !(CellType is CellType.Ojama or CellType.HardOjama || Status is not CellState.Free);
 
         /// <summary>

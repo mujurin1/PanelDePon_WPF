@@ -16,6 +16,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Matrix = PanelDePon.Types.Matrix;
 
 namespace PanelDePon_WPF.Modules.PanePonControls.Views
 {
@@ -32,39 +33,54 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         /// <summary>アニメーション速度</summary>
         private readonly static TimeSpan AnimeSpeed = TimeSpan.FromMilliseconds(100);
         private CellType _cell;
+        
         /// <summary>表示するセルの種類</summary>
-        public CellType Cell {
+        public CellType CellType {
             get => _cell;
             set {
                 if(value is CellType.Empty)
-                    throw new ArgumentException("CellType.Empty を設定することはできません。", nameof(Cell));
+                    throw new ArgumentException("CellType.Empty を設定することはできません。", nameof(CellType));
                 _cell = value;
                 CellInit();
             }
         }
-
-        public double CanvasLeft {
-            get => Canvas.GetLeft(this);
+        /// <summary>セルのサイズ</summary>
+        public int CellSize = 30;
+        private Matrix _position;
+        /// <summary>
+        ///   セルの存在する座標。マス目上
+        /// </summary>
+        public Matrix Position {
+            get => _position;
             set {
-                Animation(left: value - Canvas.GetLeft(this));
+                Animation(left:   (value.Column - _position.Column) * CellSize,
+                          bottom: (value.Row - _position.Row) * CellSize);
+                _position = value;
             }
         }
-        public double CanvasBottom {
-            get => Canvas.GetBottom(this);
-            set {
-                Animation(bottom: value - Canvas.GetBottom(this));
-            }
-        }
 
-        public PazzleCell(double left = 0, double bottom = 0)
+        //public double CanvasLeft {
+        //    get => Canvas.GetLeft(this);
+        //    set {
+        //        Animation(left: value - Canvas.GetLeft(this));
+        //    }
+        //}
+        //public double CanvasBottom {
+        //    get => Canvas.GetBottom(this);
+        //    set {
+        //        Animation(bottom: value - Canvas.GetBottom(this));
+        //    }
+        //}
+
+        public PazzleCell(Matrix matrix, CellType type)
         {
             InitializeComponent();
-            Canvas.SetLeft(this, left);
-            Canvas.SetBottom(this, bottom);
-            CanvasLeft = left;
-            CanvasBottom = bottom;
+            Canvas.SetBottom(this, matrix.Row * CellSize);
+            Canvas.SetLeft(this, matrix.Column * CellSize);
+            this._position = matrix;
             this.BorderBrush = Brushes.Black;
             this.BorderThickness = new Thickness(1);
+            this.CellType = type;
         }
 
         /// <summary>
@@ -74,7 +90,7 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         {
             Width = 30;
             Height = 30;
-            switch(Cell) {
+            switch(CellType) {
             case CellType.Red:
                 this.Background = Brushes.Red;
                 break;

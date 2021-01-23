@@ -39,7 +39,7 @@ namespace PanelDePon.Types
         ///   通常・びっくりセルかどうかの判定
         /// </summary>
         public static bool IsNomal(this CellType type)
-            => ((int)type ^ 0x10) == 0x10;
+            => ((int)type & 0x10) == 0x10;
     }
 
     /// <summary>

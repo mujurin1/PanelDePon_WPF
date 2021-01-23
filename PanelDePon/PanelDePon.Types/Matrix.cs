@@ -9,23 +9,35 @@ namespace PanelDePon.Types
     /// <summary>
     ///   Row（縦）Column（横）の２つの値を持つレコード
     /// </summary>
-    public struct AreaSize
+    public struct Matrix
     {
         public int Row;
         public int Column;
 
-        public AreaSize(int row, int col)
+        public Matrix(int row, int col)
         {
             this.Row = row;
             this.Column = col;
         }
+
+        /// <summary>
+        ///   自分自身と、自分+(+row, +col) したマトリックスを返す
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns></returns>
+        public (Matrix, Matrix) GetMatrixSet(int row, int col)
+            => (this, new Matrix(this.Row + row, this.Column + col));
+
+        public override string ToString()
+            => $"Row: {Row}  Column: {Column}";
     }
 
     /// <summary>
     ///   <para>Row（縦）Column（横）の２つの値と、</para>
     ///   <para>Row、Column の上限、下限を持つレコード</para>
     /// </summary>
-    public struct AreaSizeRange
+    public struct MatrixRange
     {
         private int _row;
         public int Row {
@@ -59,23 +71,35 @@ namespace PanelDePon.Types
         ///   <para>Row、Columnの上限はそれぞれareaSizeの値</para>
         ///   <para>下限はどちらも０</para>
         /// </summary>
-        public AreaSizeRange(AreaSize areaSize)
+        public MatrixRange(Matrix areaSize)
             : this(areaSize.Row, areaSize.Column) { }
         /// <summary>
         ///   <para>Row、Columnの上限はそれぞれrow、colの値</para>
         ///   <para>下限はどちらも０</para>
         /// </summary>
-        public AreaSizeRange(int row, int col)
+        public MatrixRange(int row, int col)
         {
             this._row = row;
             this._column = col;
             this.RowLimitLower = 0;
             this.RowLimitUpper = row;
-            this.ColumnLimitLower = col;
-            this.ColumnLimitUpper = 0;
+            this.ColumnLimitLower = 0;
+            this.ColumnLimitUpper = col;
         }
 
-        public static implicit operator AreaSize(AreaSizeRange _this)
+        public static implicit operator Matrix(MatrixRange _this)
             => new(_this.Row, _this.Column);
+
+        /// <summary>
+        ///   自分自身と、自分+(+row, +col) したマトリックスを返す
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns></returns>
+        public (Matrix, Matrix) GetMatrixSet(int row, int col)
+            => (this, new Matrix(this.Row + row, this.Column + col));
+
+        public override string ToString()
+            => $"Row: {Row}  Column: {Column}";
     }
 }

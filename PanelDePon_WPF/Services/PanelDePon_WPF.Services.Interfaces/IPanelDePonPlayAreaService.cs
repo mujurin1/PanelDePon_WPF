@@ -15,14 +15,16 @@ namespace PanelDePon_WPF.Services.Interfaces
         /// <summary>経過フレーム数</summary>
         int ElapseFrame { get; }
         /// <summary>プレイエリアの広さ。row, col</summary>
-        AreaSize PlayAreaSize { get; }
+        Matrix PlayAreaSize { get; }
         /// <summary>
         ///   <para>プレイエリア内のセルの配列</para>
         ///   <para>注意）せり上がってくるセルは Row:-1</para>
         /// </summary>
         RectangleArray<CellInfo> CellArray { get; }
-        /// <summary>せり上がっている今の高さ</summary>
-        double Border { get; }
+        /// <summary>今のスクロール位置</summary>
+        double ScrollLine { get; }
+        /// <summary>完全に１段スクロールする位置</summary>
+        double BorderLine { get; }
         /// <summary>カーソルの状態</summary>
         CursorStatus CursorStatus { get; }
 
@@ -31,6 +33,6 @@ namespace PanelDePon_WPF.Services.Interfaces
         void UpdateFrame(UserOperation userOperation);
 
         /// <summary>プレイエリアの更新が全て終了した時に呼ばれる</summary>
-        event EventHandler Updated;
+        event UpdateEventHandler Updated;
     }
 }
