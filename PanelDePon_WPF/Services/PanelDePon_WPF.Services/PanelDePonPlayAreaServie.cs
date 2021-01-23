@@ -23,13 +23,19 @@ namespace PanelDePon_WPF.Services
         /// </summary>
         public RectangleArray<CellInfo> CellArray => _playArea.CellArray;
         /// <summary>せり上がっている今の高さ</summary>
-        public double Border => _playArea.Border;
+        public double Border => _playArea.ScrollLine;
         /// <summary>カーソルの状態</summary>
         public CursorStatus CursorStatus => _playArea.CursorStatus;
 
         /// <summary>プレイエリアを１フレーム分更新する</summary>
         /// <param name="userOperation">ユーザーの操作</param>
         public void UpdateFrame(UserOperation userOperation) => _playArea.UpdateFrame(userOperation);
+
+        /// <summary>プレイエリアの更新が全て終了した時に呼ばれる</summary>
+        public event EventHandler Updated {
+            add => _playArea.Updated += value;
+            remove => _playArea.Updated -= value;
+        }
 
         public PanelDePonPlayAreaServie()
         {

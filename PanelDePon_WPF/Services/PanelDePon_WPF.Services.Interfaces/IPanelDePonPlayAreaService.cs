@@ -29,5 +29,8 @@ namespace PanelDePon_WPF.Services.Interfaces
         /// <summary>プレイエリアを１フレーム分更新する</summary>
         /// <param name="userOperation">ユーザーの操作</param>
         void UpdateFrame(UserOperation userOperation);
+
+        /// <summary>プレイエリアの更新が全て終了した時に呼ばれる</summary>
+        event EventHandler Updated;
     }
 }

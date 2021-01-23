@@ -30,7 +30,16 @@ namespace PanelDePon.Types
         Ojama     = 0x01,   // 1
         // ハードお邪魔セル
         // ハードお邪魔が隣接してるなら、隣接してるハードは消える（ノーマルは消えない）  https://youtu.be/VrR5wGJAVmI?t=525
-        HardOjama = 0x02    // 2
+        HardOjama = 0x02,    // 2
+    }
+
+    public static class CellTypeEx
+    {
+        /// <summary>
+        ///   通常・びっくりセルかどうかの判定
+        /// </summary>
+        public static bool IsNomal(this CellType type)
+            => ((int)type ^ 0x10) == 0x10;
     }
 
     /// <summary>
@@ -58,14 +67,18 @@ namespace PanelDePon.Types
     }
 
     /// <summary>
-    ///   セルの状態
+    ///   セルの状態。1bit目が0 Free  1 動かせない。動かない
     /// </summary>
-    [Flags]
     public enum CellState
     {
-        Move = 0,   // 動く　　（落下するし、入れ替えれる）
-        Stop = 1,   // 動かない（落下も入れ替えもできない）
+        Free      = 0x0000,     // 何も起こっていない
+        Lock      = 0x0001,     // 動いてる時や消滅/変身しているとき、
+                                // 操作不可。ロック
+        Flash     = 0x0011,     // 消滅変身の初動セルが点滅している
+        Neutral   = 0x0101,     // 顔の状態/消滅変身後に他のセルを待機している
+        Moment    = 0x0111,     // 消滅/変身する瞬間。１フレームのみこの状態
     }
+
 
     ///// <summary>
     /////   お邪魔だった場合、お邪魔のどの位置か
