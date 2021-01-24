@@ -25,14 +25,19 @@ namespace PanelDePon_WPF.Services.Interfaces
         double ScrollLine { get; }
         /// <summary>完全に１段スクロールする位置</summary>
         double BorderLine { get; }
+        /// <summary>スクロールしてる割合</summary>
+        double ScrollPer { get; }
         /// <summary>カーソルの状態</summary>
         CursorStatus CursorStatus { get; }
+        /// <summary>CellArray に対応した、移動したセルの移動先</summary>
+        RectangleArray<Matrix?> SwapArray { get; }
+
 
         /// <summary>プレイエリアを１フレーム分更新する</summary>
         /// <param name="userOperation">ユーザーの操作</param>
         void UpdateFrame(UserOperation userOperation);
 
         /// <summary>プレイエリアの更新が全て終了した時に呼ばれる</summary>
-        event UpdateEventHandler Updated;
+        event EventHandler Updated;
     }
 }

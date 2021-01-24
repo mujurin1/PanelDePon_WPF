@@ -26,11 +26,8 @@ namespace PanelDePon.Types
         /// <summary>セルの状態遷移に使うタイマー</summary>
         public (int Flash, int Neutral, int Lock) StateTimer;
 
-
         /// <summary>セルの種類</summary>
         public CellType CellType;
-        // /// <summary>お邪魔セルの部位。お邪魔じゃないなら NaN</summary>
-        // public OjamaPart OjamaPart;
         /// <summary>セルの状態。自由、落下中、消滅.変身.待機中</summary>
         public CellState Status;
         /// <summary>
@@ -40,13 +37,6 @@ namespace PanelDePon.Types
         public int WaitFrame;
         /// <summary>お邪魔セルが、同じお邪魔か別のお邪魔か判別するためのID</summary>
         public uint ID;
-
-        /// <summary>
-        ///   そのセルを入れ替え、落下させることは可能か？
-        /// </summary>
-        /// <returns>false:不可能　true:可能</returns>
-        public bool IsMove
-            => !(CellType is CellType.Ojama or CellType.HardOjama || Status is not CellState.Free);
 
         /// <summary>
         ///   <para>そのセルを、削除に使えるかどうか</para>
@@ -68,12 +58,16 @@ namespace PanelDePon.Types
             this.WaitFrame = 0;
         }
 
+        // アップデートは２種類
+        // 入れ替わった   セル自体の更新はしない
+        // それ以外       セル自体の更新
+        
         /// <summary>
         ///   １フレーム経過
         /// </summary>
         public void Update()
         {
-            if(Status is CellState.Free) return;
+            if(Status is CellState.Free && CellType is CellType.Empty) return;
             /* [下のSwitch文について]
              * セルの状態を時間経過で遷移させるためのもの
              * _timer に入っている数値の意味は
@@ -81,18 +75,18 @@ namespace PanelDePon.Types
              *      状態：ニュートラルをいつまで続けるか
              *      状態：ロックをいつまで続けるか
              * セルの状態は、
-             * １フリー → ２フラッシュ → ３ニュートラル → ４モーメント → ５ロック →　１フリー
+             * ０フリー → １フラッシュ → 2.1ニュートラル → 2.2モーメント → ３ロック →　０フリー
              * の順で遷移するため、必ず上から順に、数字の順番に実行する
              * 
              * また、タイマーには、３つの値しか無いが、
              * モーメントの状態は１フレームだけなので、
-             *      ３ニュートラルが実行される
+             *      (2.1)ニュートラルが実行される
              *      _timer.Neutral に 1 を入れる
              *      状態をモーメントにする
-             *      １フレーム後に、４モーメントが実行される
+             *      １フレーム後に、(2.3)モーメントが実行される
              *      状態をロックにする
              *      セルの種類によってセルの種類を変更する
-             *      ５ロックがNフレーム後実行される
+             *      (３)ロックがNフレーム後実行される
              * という風に処理して、ニュートラルタイマーを２回利用してる
              */
             // 数値１～５は実行順序
@@ -103,11 +97,11 @@ namespace PanelDePon.Types
                 break;
 
             case (0, > 0, > 0):                 // ２　　Status：Neutral or Moment
-                if(--StateTimer.Neutral == 0)
-                    if(Status is CellState.Neutral) {   // ３　Status：Neutral
+                if(--StateTimer.Neutral == 0) {
+                    if(Status is CellState.Neutral) {   // 2.1　Status：Neutral
                         Status = CellState.Moment;
-                        StateTimer.Neutral = 1;             // 　　NeutralTimerを再セット。次に再びこのケースに来て、
-                    } else {                            // ４　Status：Moment
+                        StateTimer.Neutral = 1;             // 　　NeutralTimerを再セット。次はケース２→分岐で４に入る
+                    } else {                            // 2.2　Status：Moment
                         Status = CellState.Lock;
                         if(CellType.IsNomal()) {            // 通常orびっくりセル
                             CellType = CellType.Empty;
@@ -115,12 +109,13 @@ namespace PanelDePon.Types
                             CellType = RandomCellType(n: -1);
                         }
                     }
+                }
                 break;
 
-            case (0, 0, > 0):                   // ５　State：Lock
+            case (0, 0, > 0):                   // ３　State：Lock
                 if(--StateTimer.Lock == 0)
                     Status = CellState.Free;
-                break;
+            break;
             }
         }
 

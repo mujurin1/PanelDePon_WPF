@@ -5,12 +5,18 @@
     <AssemblyName>PanelDePon_WPF.Modules.PanePonControls</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Views\WebApp2.jpg" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Prism.Wpf" Version="8.0.0.1909" />
     <PackageReference Include="ReactiveProperty.WPF" Version="7.6.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\PanelDePon_WPF.Core\PanelDePon_WPF.Core.csproj" />
     <ProjectReference Include="..\..\Services\PanelDePon_WPF.Services.Interfaces\PanelDePon_WPF.Services.Interfaces.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Views\WebApp2.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\PazzleCell.xaml">

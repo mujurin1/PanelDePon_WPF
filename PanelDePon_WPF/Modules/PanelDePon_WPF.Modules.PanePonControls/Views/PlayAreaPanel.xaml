@@ -8,6 +8,6 @@
              mc:Ignorable="d"
              d:DesignWidth="180" d:DesignHeight="360">
   <Canvas>
-    <Canvas x:Name="PanePonCanvas"/>
+    <Canvas x:Name="PlayAreaCanvas"/>
   </Canvas>
 </UserControl>

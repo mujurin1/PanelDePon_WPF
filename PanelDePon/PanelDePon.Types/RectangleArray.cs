@@ -1,21 +1,28 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
 namespace PanelDePon.Types
 {
-    public struct RectangleArray<T>
+    public struct RectangleArray<T> : IEnumerable<T>
     {
         private readonly T[,] _array;
 
-        public int Row => _array.GetLength(0) - 1;
-        public int Column => _array.GetLength(1);
+        public readonly int Row;
+        public readonly int Column;
+        public readonly Matrix Matrix;
 
-        public RectangleArray(int row, int col)
+        public RectangleArray(int row, int col) : this(new Matrix(row, col)) { }
+        public RectangleArray(Matrix matrix)
         {
-            this._array = new T[row + 1, col];
+            this._array = new T[matrix.Row + 1, matrix.Column];
+            this.Row = matrix.Row;
+            this.Column = matrix.Column;
+            this.Matrix = matrix;
         }
+
 
         /// <summary>
         ///   <para>配列の取得、変更</para>
@@ -27,15 +34,36 @@ namespace PanelDePon.Types
         }
 
         /// <summary>
-        ///   配列を全て item で埋める
+        ///   Matrix をインデックスにしてアクセスする
+        /// </summary>
+        public T this[Matrix matrix] {
+            get => this[matrix.Row, matrix.Column];
+            set => this[matrix.Row, matrix.Column] = value;
+        }
+
+        /// <summary>
+        ///   自身のコピーを、全て item で埋めて返す
         /// </summary>
         /// <param name="item">この値で埋める</param>
-        public void Reset(T item)
+        public RectangleArray<T> CopyAndReset(T item)
         {
+            RectangleArray<T> copy = new RectangleArray<T>(this.Row, this.Column);
             for(int row = -1; row < Row; row++)
-                for(int col = 0; col < Column; col++) {
-                    this[row, col] = item;
-                }
+                for(int col = 0; col < Column; col++)
+                    copy[row, col] = item;
+            return copy;
         }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            for(int row = -1; row < Row; row++) {
+                for(int col = 0; col < Column; col++) {
+                    yield return this[row, col];
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+            => this.GetEnumerator();
     }
 }

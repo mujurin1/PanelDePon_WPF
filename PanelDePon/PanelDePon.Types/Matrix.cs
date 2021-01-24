@@ -31,6 +31,9 @@ namespace PanelDePon.Types
 
         public override string ToString()
             => $"Row: {Row}  Column: {Column}";
+
+        public bool Equals(Matrix matrix)
+            => this.Row == matrix.Row && this.Column == matrix.Column;
     }
 
     /// <summary>

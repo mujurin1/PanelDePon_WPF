@@ -38,6 +38,7 @@ namespace PanelDePon.Types
         /// <summary>
         ///   通常・びっくりセルかどうかの判定
         /// </summary>
+        /// <remarks>true: 通常・びっくりセル  false: それ以外</remarks>
         public static bool IsNomal(this CellType type)
             => ((int)type & 0x10) == 0x10;
     }
@@ -53,7 +54,7 @@ namespace PanelDePon.Types
         CursorRight = 3,        // カーソル右移動
         CursorDown = 4,         // カーソル下移動
         ClickChangeCell = 5,    // クリックで入れ替える（カーソル移動＋入れ替え）、まだ未実装
-        ChangeCell = 6,         // セルを入れ替える
+        Swap = 6,               // セルを入れ替える
         ScrollSpeedUp = 7,      // スクロール速度を早くする
     }
 

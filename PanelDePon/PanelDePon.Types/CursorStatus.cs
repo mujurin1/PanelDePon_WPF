@@ -44,25 +44,25 @@ namespace PanelDePon.Types
         ///   <para>userOperation は、カーソル操作系しかあり得ない</para>
         /// </summary>
         /// <param name="userOperation">ユーザーの操作</param>
-        public void UpdateFrame(UserOperation userOperation)
+        public CursorStatus UpdateFrame(UserOperation userOperation)
         {
             // カーソルが操作不能なら
             if(CursorWait > 0) {
                 CursorWait--;
-                return;
+                return this;
             }
             switch(userOperation) {
             case UserOperation.CursorUp:
-                CursorPos.Row++;
+                CursorMove(1, 0);
                 break;
             case UserOperation.CursorLeft:
-                CursorPos.Column--;
+                CursorMove(0, -1);
                 break;
             case UserOperation.CursorRight:
-                CursorPos.Column++;
+                CursorMove(0, 1);
                 break;
             case UserOperation.CursorDown:
-                CursorPos.Row--;
+                CursorMove(-1, 0);
                 break;
             case UserOperation.ClickChangeCell:
                 throw new NotImplementedException("ユーザーの操作例外。クリックしてセルを入れ替える処理はまだ実装していません。がんばって");
@@ -70,6 +70,7 @@ namespace PanelDePon.Types
                 throw new ArgumentException($"ユーザーの操作系以外の値が渡されました。入力された値：{userOperation}",
                                             nameof(userOperation));
             }
+            return this;
         }
 
         /// <summary>
@@ -78,6 +79,14 @@ namespace PanelDePon.Types
         public void UpdateFrame()
         {
             if(CursorWait > 0) CursorWait--;
+        }
+
+        private void CursorMove(int row, int column)
+        {
+            var matrix = CursorPos;
+            matrix.Row += row;
+            matrix.Column += column;
+            CursorPos = matrix;
         }
     }
 }

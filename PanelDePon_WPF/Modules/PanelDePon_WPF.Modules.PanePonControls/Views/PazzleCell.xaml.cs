@@ -24,73 +24,36 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
     ///   <para>パネポンの動かして消すセル</para>
     ///   <para>Canvas.Left 等は使用禁止</para>
     /// </summary>
-    public partial class PazzleCell : UserControl
+    public partial class PazzleCell : PlayAreaControlAbs
     {
-        /// <summary>
-        ///   何度も同じストーリーボードを生成するのは無駄なので、キャッシュをしよう
-        /// </summary>
-        private readonly Dictionary<(string, double), Storyboard> _storyboardCache = new();
-        /// <summary>アニメーション速度</summary>
-        private readonly static TimeSpan AnimeSpeed = TimeSpan.FromMilliseconds(100);
-        private CellType _cell;
-        
-        /// <summary>表示するセルの種類</summary>
-        public CellType CellType {
+        private CellInfo _cell;
+        /// <summary>表示するセルの情報</summary>
+        public CellInfo CellInfo {
             get => _cell;
-            set {
-                if(value is CellType.Empty)
-                    throw new ArgumentException("CellType.Empty を設定することはできません。", nameof(CellType));
+            private set {
                 _cell = value;
                 CellInit();
             }
         }
-        /// <summary>セルのサイズ</summary>
-        public int CellSize = 30;
-        private Matrix _position;
-        /// <summary>
-        ///   セルの存在する座標。マス目上
-        /// </summary>
-        public Matrix Position {
-            get => _position;
-            set {
-                Animation(left:   (value.Column - _position.Column) * CellSize,
-                          bottom: (value.Row - _position.Row) * CellSize);
-                _position = value;
-            }
-        }
+        /// <summary>このセルはもう表示しない。消してくれ</summary>
+        public bool IsRemove { get; private set; } = false;
 
-        //public double CanvasLeft {
-        //    get => Canvas.GetLeft(this);
-        //    set {
-        //        Animation(left: value - Canvas.GetLeft(this));
-        //    }
-        //}
-        //public double CanvasBottom {
-        //    get => Canvas.GetBottom(this);
-        //    set {
-        //        Animation(bottom: value - Canvas.GetBottom(this));
-        //    }
-        //}
-
-        public PazzleCell(Matrix matrix, CellType type)
+        public PazzleCell(IPanelDePonPlayAreaService playAreaService, Matrix matrix) : base(playAreaService, matrix)
         {
             InitializeComponent();
-            Canvas.SetBottom(this, matrix.Row * CellSize);
-            Canvas.SetLeft(this, matrix.Column * CellSize);
-            this._position = matrix;
             this.BorderBrush = Brushes.Black;
             this.BorderThickness = new Thickness(1);
-            this.CellType = type;
+            this.CellInfo = _playAreaService.CellArray[matrix];
         }
 
         /// <summary>
-        ///   表示するセルの初期化
+        ///   表示の初期化
         /// </summary>
         private void CellInit()
         {
-            Width = 30;
-            Height = 30;
-            switch(CellType) {
+            Width = CellSize;
+            Height = CellSize;
+            switch(CellInfo.CellType) {
             case CellType.Red:
                 this.Background = Brushes.Red;
                 break;
@@ -113,55 +76,66 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         }
 
         /// <summary>
-        ///   <para>自分の位置をCanvas座標で動かす</para>
-        ///   <para>Left,Bottom が同時に動くことはないので、両方値が入っている場合Leftを動かす</para>
+        ///   表示の更新。自分が表示するセルの情報で更新する
         /// </summary>
-        /// <param name="left"></param>
-        /// <param name="bottom"></param>
-        private void Animation(double left = 0, double bottom = 0)
+        /// <param name="cellInfo">表示するセルの情報</param>
+        /// <remarks>お邪魔から、お邪魔顔セルになったときに、生成するセルのエリアを返す</remarks>
+        public Matrix? Update()
         {
-            (string, double) animeInfo = (left, bottom) switch {
-                (0, 0) => (null, double.NaN),       // 移動量なし
-                (_, 0) => ("(Canvas.Left)", left),
-                (0, _) => ("(Canvas.Bottom)", bottom),
-                _ => throw new Exception($"PazzleCell Animation: Left, Bottom の値が不正です\nLeft {left}  Bottom {bottom}")  // NaNのまま進むとアニメーションで例外になるので
-            };
-
-            if(animeInfo.Item1 is null) return;
-            // このアニメーションのストーリーは初めて
-            if(!_storyboardCache.TryGetValue(animeInfo, out Storyboard storyboard)) {
-                // ストーリーボード作成
-                storyboard = new Storyboard();
-                storyboard.Children.Add(CreateAnimation(animeInfo));
-                // ストーリーボードをキャッシュに追加
-                _storyboardCache.Add(animeInfo, storyboard);
+            // もし対応したセルが移動していた場合ずれているので、調べる
+            // 移動していたら
+            if(_playAreaService.SwapArray[Matrix] is Matrix matrix) {
+                Matrix = matrix;
+                CellInfo = _playAreaService.CellArray[Matrix];
+                Moji.Text = $"動{CellInfo.StateTimer.Lock}";
+                return null;
             }
-
-            // アニメーションを開始します
-            storyboard.Begin();
-        }
+            // 移動でなくても、自分が見るセルの情報を更新する
+            CellInfo = _playAreaService.CellArray[Matrix];
 
 
-        private DoubleAnimation CreateAnimation((string, double) animeInfo)
-            => CreateAnimation(animeInfo.Item1, animeInfo.Item2);
+            /* ・更新内容
+             * * セルの移動
+             * * セルの点滅・顔・消滅変身
+             */
+            // アップデート内容：セルの点滅・顔・消滅
+            switch(CellInfo.Status) {
+            case (CellState.Free):      // 何もない or 自分の表示を削除
+                if(CellInfo.CellType is CellType.Empty) {
+                    // 自分の削除フラグを立てる
+                    IsRemove = true;
+                } else {
+                    // 何も起きてない状態
+                    Moji.Text = "普通";
+                }
+                break;
+            case (CellState.Lock):      // 移動 or 消滅変身後待機
+                if(CellInfo.CellType is CellType.Empty) {           // 種類：空     普通のセルが消滅した
+                    Moji.Text = $"消{CellInfo.StateTimer.Lock}";
+                } else if(CellInfo.CellType.IsNomal()) {            // 種類：普通   お邪魔が普通のセルになった or 落下中
+                    Moji.Text = $"動{CellInfo.StateTimer.Lock}";
+                    // TODO: 見た目を普通のセルに
+                } else {
+                    throw new Exception("セルの状態がおかしい");
+                }
+                break;
+            case (CellState.Flash):     // 点滅
+                // TODO: フラッシュ
+                Moji.Text = $"点{CellInfo.StateTimer.Flash}";
+                break;
+            case (CellState.Neutral):   // 顔
+                Moji.Text = $"顔{CellInfo.StateTimer.Neutral}";
+                // TODO: 顔
 
-        /// <summary>
-        ///   DoubleAnimation を生成して返す簡易メソッド
-        /// </summary>
-        /// <param name="propertyPath">アニメーションさせるプロパティ名</param>
-        /// <param name="value">移動量</param>
-        /// <returns></returns>
-        private DoubleAnimation CreateAnimation(string propertyPath, double value)
-        {
-            var anime = new DoubleAnimation();
-            // TargetName添付プロパティではなく、Target添付プロパティで
-            // 直接アニメーションのターゲットを指定しています。
-            Storyboard.SetTarget(anime, this);
-            Storyboard.SetTargetProperty(anime, new PropertyPath(propertyPath));
-            anime.By = value;
-            anime.Duration = AnimeSpeed;
-
-            return anime;
+                // 範囲を持ったお邪魔から、１マスの顔の表示のお邪魔に変わり、
+                // 自分のいた範囲を返す
+                return new Matrix(0, 0);
+            case (CellState.Moment):    // 消滅変身
+                Moji.Text = $"変{CellInfo.StateTimer.Neutral}";
+                // TODO: 消滅変身
+                break;
+            }
+            return null;
         }
     }
 }
