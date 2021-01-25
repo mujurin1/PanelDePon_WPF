@@ -106,14 +106,6 @@ namespace PanelDePon.PlayArea
                 }
             }
             //==============================Debug用
-            //var dbC = CellInfo.Empty;
-            //dbC.CellType = CellType.Yellow;
-            //_cellArray[0, 0] = dbC;
-            //_cellArray[0, 1] = dbC;
-            //_cellArray[0, 2] = dbC;
-            //_cellArray[0, 3] = dbC;
-            //_cellArray[0, 4] = dbC;
-            //_cellArray[0, 5] = dbC;
             //// 一番下（Row-1）のセルをランダムに追加する
             //for(int col = 0; col < PlayAreaSize.Column; col++) {
             //    var cell = CellArray[-1, col];
@@ -148,7 +140,7 @@ namespace PanelDePon.PlayArea
             // 更新中かどうか
             lock(_updateLock) {
                 if(Updating) {
-                    Debug.WriteLine("更新中に次の更新が呼ばれた");
+                    Debug.WriteLine("================================\n更新中に次の更新が呼ばれた==============================");
                     return;
                 }
                 Updating = true;
@@ -187,13 +179,11 @@ namespace PanelDePon.PlayArea
                 if(cursorCellL.CellType is CellType.Empty && cursorCellR.CellType is CellType.Empty)
                     break;
 
-                // カーソル位置のセルのどちらも移動可能
-                if(cursorCellL.CellType.IsNomal() && cursorCellL.Status is CellState.Free &&
-                   cursorCellR.CellType.IsNomal() && cursorCellR.Status is CellState.Free) {
+                // カーソル位置のセルのどちらも移動可能（両方空なら上で弾かれる）
+                if(!cursorCellL.CellType.IsOjama() && cursorCellL.Status is CellState.Free &&
+                   !cursorCellR.CellType.IsOjama() && cursorCellR.Status is CellState.Free) {
                     SwapCell(CursorStatus.Matrix.Row, CursorStatus.Matrix.Column,
                              CursorStatus.Matrix.Row, CursorStatus.Matrix.Column + 1);
-                    // 入れ替わりリストに追加
-                    //swapList.Add(mat);
                 }
                 break;
             case UserOperation.ScrollSpeedUp:

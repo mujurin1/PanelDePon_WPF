@@ -40,7 +40,13 @@ namespace PanelDePon.Types
         /// </summary>
         /// <remarks>true: 通常・びっくりセル  false: それ以外</remarks>
         public static bool IsNomal(this CellType type)
-            => ((int)type & 0x10) == 0x10;
+            => type is >= CellType.Red and <= CellType.Bikkuri;
+        /// <summary>
+        ///   おじゃまセルかどうかの判定
+        /// </summary>
+        /// <remarks>true: おじゃまセル  false: それ以外</remarks>
+        public static bool IsOjama(this CellType type)
+            => type is CellType.Ojama or CellType.HardOjama;
     }
 
     /// <summary>

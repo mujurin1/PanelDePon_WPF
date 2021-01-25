@@ -38,7 +38,7 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         /// <summary>このセルはもう表示しない。消してくれ</summary>
         public bool IsRemove { get; private set; } = false;
         /// <summary>セルの移動方向  -1:静止 0:上 1:左 2:右 3:下</summary>
-        private int _direction = -1;
+        private (int dir, int time) _direction = (-1, 0);
 
         public PazzleCell(IPanelDePonPlayAreaService playAreaService, Matrix matrix) : base(playAreaService, matrix)
         {
@@ -93,32 +93,30 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
 
             // もし対応したセルが移動していたら移動方向を調べる
             if(_playAreaService.SwapArray[Matrix] is Matrix matrix) {
-                //this.Matrix = matrix;
-                //CellInfo = _playAreaService.CellArray[Matrix];
-                //Moji.Text = $"動{CellInfo.StateTimer.Lock}";
-                //Canvas.SetBottom(this, matrix.Row * CellSize + CellInfo.TransitionTime / CellInfo.StateTimer.Lock);
-                //Canvas.SetLeft(this, matrix.Row * CellSize + CellInfo.TransitionTime / CellInfo.StateTimer.Lock);
-                //return null;
+                // 自分が表示するセルの情報を取得
+                CellInfo = _playAreaService.CellArray[matrix];
+
+                var old = Matrix;
                 switch((matrix.Row-Matrix.Row, matrix.Column - Matrix.Column)) {
                 case (0, -1):   // 左方向
-                    _direction = 1; break;
+                    _direction = (1, CellInfo.StateTimer.Lock); break;
                 case (0, 1):    // 右方向
-                    _direction = 2; break;
+                    _direction = (2, CellInfo.StateTimer.Lock); break;
                 case (-1, 0):   // 下方向
-                    _direction = 3; break;
+                    _direction = (3, CellInfo.StateTimer.Lock); break;
                 default:        // 上方向
                     throw new Exception($"上方向への移動はありえません  new:{(matrix)}  old:{Matrix}");
                 }
                 this.Matrix = matrix;
-            }
+            } else  // 移動して無くても情報を更新
+                CellInfo = _playAreaService.CellArray[Matrix];
 
             // ちょっと、やだけど、毎回位置を指定し直そう
-            if(CellInfo.StateTimer.Lock == 0 || _direction == -1) {
-                _direction = -1;
+            if(_direction.time is 0) {
                 Canvas.SetLeft(this, Matrix.Column * CellSize);
                 Canvas.SetBottom(this, Matrix.Row * CellSize);
             } else {
-                switch(_direction) {
+                switch(_direction.dir) {
                 case (1):   // 左
                     Canvas.SetLeft(this,
                         Matrix.Column * CellSize + CellSize * (CellInfo.StateTimer.Lock / CellInfo.TransitionTime));
@@ -132,6 +130,7 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
                         Matrix.Row * CellSize + CellSize * (CellInfo.StateTimer.Lock / CellInfo.TransitionTime));
                     break;
                 }
+                _direction.time--;
             }
 
             /* ・更新内容
@@ -139,13 +138,9 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
              * * セルの点滅・顔・消滅変身
              */
             // アップデート内容：セルの点滅・顔・消滅
-            // 自分が表示するセルの情報を取得
-            CellInfo = _playAreaService.CellArray[Matrix];
             switch(CellInfo.Status) {
             case (CellState.Free):      // 自分の表示を削除 or 何もしない
                 if(CellInfo.CellType is CellType.Empty) {
-                    // 自分の削除フラグを立てる
-                    IsRemove = true;
                 } else {
                     // 何も起きてない状態
                     Moji.Text = "普通";
@@ -153,7 +148,9 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
                 break;
             case (CellState.Lock):      // 移動 or 消滅変身後待機
                 if(CellInfo.CellType is CellType.Empty) {           // 種類：空     普通のセルが消滅した
-                    Moji.Text = $"消{CellInfo.StateTimer.Lock}";
+                    // 自分の削除フラグを立てる
+                    IsRemove = true;
+                    //Moji.Text = $"消{CellInfo.StateTimer.Lock}";
                 } else if(CellInfo.CellType.IsNomal()) {            // 種類：普通   お邪魔が普通のセルになった
 
                     Moji.Text = $"動{CellInfo.StateTimer.Lock}";
