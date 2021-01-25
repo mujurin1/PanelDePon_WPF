@@ -72,7 +72,8 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         public PlayAreaPanel()
         {
             InitializeComponent();
-            Canvas.SetBottom(PlayAreaCanvas, 0);
+            Canvas.SetBottom(CellCanvas, 0);
+            Canvas.SetBottom(CursorCanvas, 0);
         }
 
         /// <summary>
@@ -80,23 +81,26 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         /// </summary>
         private void PlayAreaInit()
         {
-            // フレーム更新時のイベントを追加
+            // プレイエリア更新後イベントに追加
             _playAreaSerivce.Updated += (_, _) => Update();
 
             // 画面サイズ変更
             Width = 30 * PlayAreaSerivce.PlayAreaSize.Column;
             Height = 30 * PlayAreaSerivce.PlayAreaSize.Row;
+            Debug.WriteLine(Width);
+            Debug.WriteLine(Height);
 
+            // カーソルの初期化
+            CursorCanvas.Children.Clear();
+            this._cursor = new SwapCursor(_playAreaSerivce, PlayAreaSerivce.CursorStatus.CursorPos);
+            CursorCanvas.Children.Add(_cursor);
             // 表示セルの初期化
             // TODO: お邪魔セルを表示させる（今はお邪魔はやってない
-            PlayAreaCanvas.Children.Clear();
+            CellCanvas.Children.Clear();
             for(int row = -1; row < PlayAreaSerivce.PlayAreaSize.Row; row++) {
                 foreach(var cell in CreatePazzleCellColumn(row))
-                    PlayAreaCanvas.Children.Add(cell);
+                    CellCanvas.Children.Add(cell);
             }
-            // カーソルの初期化
-            this._cursor = new SwapCursor(_playAreaSerivce, PlayAreaSerivce.CursorStatus.CursorPos);
-            PlayAreaCanvas.Children.Add(_cursor);
         }
 
         /// <summary>
@@ -105,46 +109,53 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         private void Update()
         {
             // ===============================スクロールの更新
-            if(_playAreaSerivce.ScrollLine == 0) {   // ちょうどせり上がった
-                Canvas.SetBottom(PlayAreaCanvas, 0);
+            if(_playAreaSerivce.ScrollLine == 0) {      // ちょうどせり上がった
+                // キャンバス内のコントロールを１段上に上げる
+                // カーソル
+                _cursor.Move(new(_cursor.Matrix.Row+1, _cursor.Matrix.Column), isAnimation:false);
+                // セル
+                foreach(var ctrl in CellCanvas.Children) {
+                    var cell = ctrl as PlayAreaControlAbs;
+                    cell.Move(new(cell.Matrix.Row+1, cell.Matrix.Column), isAnimation:false);
+                }
+                
                 // 一番下に、新しくセルを生成する
                 foreach(var cell in CreatePazzleCellColumn(row:-1))
-                    PlayAreaCanvas.Children.Add(cell);
-
-            } else
-                Canvas.SetBottom(PlayAreaCanvas, _playAreaSerivce.ScrollPer * 30);
+                    CellCanvas.Children.Add(cell);
+            }
+            Canvas.SetBottom(CellCanvas, _playAreaSerivce.ScrollPer * 30);
+            Canvas.SetBottom(CursorCanvas, _playAreaSerivce.ScrollPer * 30);
 
 
             // ===============================PlayAreaCanvas の更新
+            // カーソル
+            _cursor.Update();
+            // セル
             var removeCells = new List<PazzleCell>();
-            foreach(var ctrl in PlayAreaCanvas.Children) {
-                if(ctrl is PazzleCell cell) {
-                    // セルの更新    お邪魔から普通のセルに変身するとき、そのお邪魔の範囲を返す
-                    if(cell.Update() is Matrix matrix) {
-                        // TODO: 範囲を持ったセル（お邪魔）から、単体のセルになった時
-                        // matrix: そのセルのいた範囲
-                    }
-                    // 削除するセル
-                    if(cell.IsRemove) removeCells.Add(cell);
-                } else if(ctrl is SwapCursor cursor) {
-                    cursor.Update();
+            foreach(var ctrl in CellCanvas.Children) {
+                var cell = ctrl as PazzleCell;
+                // セルの更新    お邪魔から普通のセルに変身するとき、そのお邪魔の範囲を返す
+                if(cell.Update() is Matrix matrix) {
+                    // TODO: 範囲を持ったセル（お邪魔）から、単体のセルになった時
+                    // matrix: そのセルのいた範囲
                 }
+                // 削除するセル
+                if(cell.IsRemove) removeCells.Add(cell);
             }
             // 消滅したセルを削除
             foreach(var cell in removeCells) {
-                PlayAreaCanvas.Children.Remove(cell);
+                CellCanvas.Children.Remove(cell);
             }
 
-
             // カーソルの更新 ホントは最大でも片方しか動かないけど、これでいいや
-            _cursor.Matrix = PlayAreaSerivce.CursorStatus.CursorPos;
+            _cursor.Move(PlayAreaSerivce.CursorStatus.CursorPos);
         }
 
         /// <summary>
         ///   横一列分の、セルを作って返す
         /// </summary>
-        /// <param name="cellInfo"></param>
-        /// <returns></returns>
+        /// <param name="row">生成する段</param>
+        /// <returns>生成したパズルセル１段</returns>
         private List<PazzleCell> CreatePazzleCellColumn(int row)
         {
             var cells = new List<PazzleCell>();
@@ -156,12 +167,8 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
                 if(cell.CellType is CellType.Ojama or CellType.HardOjama) continue;
                 // セルコントロールを生成して、キャンバスに追加
                 var matrix = new Matrix(row, col);
-                var cellP = new PazzleCell(_playAreaSerivce, matrix);
-                //// 生成したセルパネルをリストに追加
-                //_pazzleCells.Add(cellP);
-                PlayAreaCanvas.Children.Add(cellP);
+                cells.Add(new PazzleCell(_playAreaSerivce, matrix));
             }
-
             return cells;
         }
 

@@ -20,15 +20,6 @@ namespace PanelDePon.Types
             this.Column = col;
         }
 
-        /// <summary>
-        ///   自分自身と、自分+(+row, +col) したマトリックスを返す
-        /// </summary>
-        /// <param name="row"></param>
-        /// <param name="col"></param>
-        /// <returns></returns>
-        public (Matrix, Matrix) GetMatrixSet(int row, int col)
-            => (this, new Matrix(this.Row + row, this.Column + col));
-
         public override string ToString()
             => $"Row: {Row}  Column: {Column}";
 
@@ -47,7 +38,7 @@ namespace PanelDePon.Types
             get => _row;
             set {
                 // 範囲チェック
-                if(RowLimitLower <= value && value <= RowLimitUpper)
+                if(RowLimit.Lower <= value && value < RowLimit.Upper)
                     _row = value;
             }
         }
@@ -56,51 +47,37 @@ namespace PanelDePon.Types
             get => _column;
             set {
                 // 範囲チェック
-                if(ColumnLimitLower <= value && value <= ColumnLimitUpper)
+                if(ColumnLimit.Lower <= value && value < ColumnLimit.Upper)
                     _column = value;
             }
         }
 
-        /// <summary>Rowがとり得る上限</summary>
-        public int RowLimitUpper;
-        /// <summary>Rowがとり得る下限</summary>
-        public int RowLimitLower;
-        /// <summary>Columnがとり得る上限</summary>
-        public int ColumnLimitUpper;
-        /// <summary>Columnがとり得る下限</summary>
-        public int ColumnLimitLower;
+        /// <summary>
+        ///   <para>Rowがとり得る範囲（下限,上限）</para>
+        ///   <para>下限以上、上限未満</para>
+        /// </summary>
+        public (int Lower, int Upper) RowLimit;
+        /// <summary>
+        ///   <para>Columnがとり得る範囲（下限,上限）</para>
+        ///   <para>下限以上、上限未満</para>
+        /// </summary>
+        public (int Lower, int Upper) ColumnLimit;
 
+        public MatrixRange(int row, int col) : this(new Matrix(row, col)) { }
         /// <summary>
-        ///   <para>Row、Columnの上限はそれぞれareaSizeの値</para>
-        ///   <para>下限はどちらも０</para>
+        ///   <para>渡された Matrix を自分の位置、範囲の上限にする</para>
+        ///   <para>下限の初期値は０</para>
         /// </summary>
-        public MatrixRange(Matrix areaSize)
-            : this(areaSize.Row, areaSize.Column) { }
-        /// <summary>
-        ///   <para>Row、Columnの上限はそれぞれrow、colの値</para>
-        ///   <para>下限はどちらも０</para>
-        /// </summary>
-        public MatrixRange(int row, int col)
+        public MatrixRange(Matrix matrix)
         {
-            this._row = row;
-            this._column = col;
-            this.RowLimitLower = 0;
-            this.RowLimitUpper = row;
-            this.ColumnLimitLower = 0;
-            this.ColumnLimitUpper = col;
+            this._row = matrix.Row;
+            this._column = matrix.Column;
+            this.RowLimit = (0, matrix.Row);
+            this.ColumnLimit = (0, matrix.Column);
         }
 
         public static implicit operator Matrix(MatrixRange _this)
             => new(_this.Row, _this.Column);
-
-        /// <summary>
-        ///   自分自身と、自分+(+row, +col) したマトリックスを返す
-        /// </summary>
-        /// <param name="row"></param>
-        /// <param name="col"></param>
-        /// <returns></returns>
-        public (Matrix, Matrix) GetMatrixSet(int row, int col)
-            => (this, new Matrix(this.Row + row, this.Column + col));
 
         public override string ToString()
             => $"Row: {Row}  Column: {Column}";

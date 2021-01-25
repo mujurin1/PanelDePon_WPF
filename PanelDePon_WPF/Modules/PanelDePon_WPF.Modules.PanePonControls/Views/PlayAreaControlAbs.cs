@@ -29,18 +29,8 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
 
         /// <summary>セルのサイズ</summary>
         public int CellSize = 30;
-        protected Matrix _matrix;
-        /// <summary>
-        ///   自分の存在位置。Matrix上
-        /// </summary>
-        public virtual Matrix Matrix {
-            get => _matrix;
-            set {
-                MoveAnimation(left: (value.Column - _matrix.Column) * CellSize,
-                              bottom: (value.Row - _matrix.Row) * CellSize);
-                _matrix = value;
-            }
-        }
+        /// <summary>自分の存在位置。Matrix上</summary>
+        public Matrix Matrix { get; private set; }
 
         //public double CanvasLeft {
         //    get => Canvas.GetLeft(this);
@@ -63,9 +53,25 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         public PlayAreaControlAbs(IPanelDePonPlayAreaService playAreaService, Matrix matrix)
         {
             this._playAreaService = playAreaService;
-            this._matrix = matrix;
+            this.Matrix = matrix;
             Canvas.SetBottom(this, Matrix.Row * CellSize);
             Canvas.SetLeft(this, Matrix.Column * CellSize);
+        }
+
+        /// <summary>
+        ///   セルの表示位置を動かす
+        /// </summary>
+        /// <param name="matrix">移動先</param>
+        /// <param name="isAnimation">アニメーションする(true)かどうか</param>
+        public void Move(Matrix matrix, bool isAnimation = true)
+        {
+            if(isAnimation)
+                MoveAnimation(left: (matrix.Column - Matrix.Column) * CellSize,
+                              bottom: (matrix.Row - Matrix.Row) * CellSize);
+            else {
+                Canvas.SetBottom(this, matrix.Row * CellSize);
+            }
+            Matrix = matrix;
         }
 
         /// <summary>

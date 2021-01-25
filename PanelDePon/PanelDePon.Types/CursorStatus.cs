@@ -27,16 +27,12 @@ namespace PanelDePon.Types
         /// </summary>
         public uint CursorWait;
 
+        public CursorStatus(int row, int col) : this (new Matrix(row, col)) { }
         public CursorStatus(Matrix playAreaSize)
         {
             this.PlayAreaSize = playAreaSize;
-            // カーソルは、プレイエリアの横列-1の範囲にしか存在しないため
-            playAreaSize.Column--;
-            this.CursorPos = new MatrixRange(playAreaSize) {
-                Row = 0, Column = 0
-            };
+            this.CursorPos = new MatrixRange(playAreaSize);
             this.CursorWait = 0;
-            Debug.WriteLine(CursorPos);
         }
 
         /// <summary>
@@ -44,14 +40,19 @@ namespace PanelDePon.Types
         ///   <para>userOperation は、カーソル操作系しかあり得ない</para>
         /// </summary>
         /// <param name="userOperation">ユーザーの操作</param>
-        public CursorStatus UpdateFrame(UserOperation userOperation)
+        public CursorStatus Update(UserOperation userOperation)
         {
-            // カーソルが操作不能なら
+            // カーソルが操作不能
             if(CursorWait > 0) {
                 CursorWait--;
                 return this;
             }
             switch(userOperation) {
+            case UserOperation.NaN or 
+                 UserOperation.ClickChangeCell or
+                 UserOperation.Swap or
+                 UserOperation.ScrollSpeedUp:
+                break;
             case UserOperation.CursorUp:
                 CursorMove(1, 0);
                 break;
@@ -64,21 +65,8 @@ namespace PanelDePon.Types
             case UserOperation.CursorDown:
                 CursorMove(-1, 0);
                 break;
-            case UserOperation.ClickChangeCell:
-                throw new NotImplementedException("ユーザーの操作例外。クリックしてセルを入れ替える処理はまだ実装していません。がんばって");
-            default:
-                throw new ArgumentException($"ユーザーの操作系以外の値が渡されました。入力された値：{userOperation}",
-                                            nameof(userOperation));
             }
             return this;
-        }
-
-        /// <summary>
-        ///   カーソルの状態を１フレーム更新する
-        /// </summary>
-        public void UpdateFrame()
-        {
-            if(CursorWait > 0) CursorWait--;
         }
 
         private void CursorMove(int row, int column)

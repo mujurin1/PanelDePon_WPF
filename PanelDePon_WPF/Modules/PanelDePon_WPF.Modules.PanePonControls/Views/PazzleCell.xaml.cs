@@ -85,13 +85,11 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             // もし対応したセルが移動していた場合ずれているので、調べる
             // 移動していたら
             if(_playAreaService.SwapArray[Matrix] is Matrix matrix) {
-                Matrix = matrix;
+                Move(matrix);
                 CellInfo = _playAreaService.CellArray[Matrix];
                 Moji.Text = $"動{CellInfo.StateTimer.Lock}";
                 return null;
             }
-            // 移動でなくても、自分が見るセルの情報を更新する
-            CellInfo = _playAreaService.CellArray[Matrix];
 
 
             /* ・更新内容
@@ -99,8 +97,10 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
              * * セルの点滅・顔・消滅変身
              */
             // アップデート内容：セルの点滅・顔・消滅
+            // 自分が表示するセルの情報を取得
+            CellInfo = _playAreaService.CellArray[Matrix];
             switch(CellInfo.Status) {
-            case (CellState.Free):      // 何もない or 自分の表示を削除
+            case (CellState.Free):      // 自分の表示を削除 or 何もしない
                 if(CellInfo.CellType is CellType.Empty) {
                     // 自分の削除フラグを立てる
                     IsRemove = true;

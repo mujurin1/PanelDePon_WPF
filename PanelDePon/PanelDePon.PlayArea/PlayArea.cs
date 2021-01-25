@@ -80,7 +80,7 @@ namespace PanelDePon.PlayArea
             // 　　　　　　　一番下はせり上がる列なので更に＋１
             this._cellArray = new RectangleArray<CellInfo>((int)(row * 1.5) + 1, col);
             this._swapArray = new RectangleArray<Matrix?>(CellArray.Row, CellArray.Column);
-            this.CursorStatus = new CursorStatus(PlayAreaSize);
+            this.CursorStatus = new CursorStatus(PlayAreaSize.Row, PlayAreaSize.Column - 1);
             PlayAreaInit();
         }
 
@@ -90,6 +90,11 @@ namespace PanelDePon.PlayArea
         /// </summary>
         private void PlayAreaInit()
         {
+            // カーソル位置を初期化
+            var cursor = CursorStatus;
+            cursor.CursorPos.Row = 0;
+            cursor.CursorPos.Column = 0;
+            CursorStatus = cursor;
             // セルの配置を初期化する
             _cellArray = CellArray.CopyAndReset(CellInfo.Empty);
             for(int row = -1; row <= 5; row++) {
@@ -172,12 +177,6 @@ namespace PanelDePon.PlayArea
 
             //==============================ユーザーの操作==============================
             switch(userOperation) {
-            case UserOperation.NaN:
-                break;
-            case >= UserOperation.CursorUp and <= UserOperation.ClickChangeCell:
-                // カーソル移動系 or クリック操作なら、カーソルに処理を渡して、ごーとぅー
-                CursorStatus = CursorStatus.UpdateFrame(userOperation);
-                goto CursorUpdateCompleted;
             case UserOperation.Swap:      // カーソルの位置のセルを入れ替える
                 // カーソルの位置のセルを取得
                 var cursorCellL = CellArray[CursorStatus.CursorPos.Row, CursorStatus.CursorPos.Column];
@@ -199,13 +198,11 @@ namespace PanelDePon.PlayArea
             case UserOperation.ScrollSpeedUp:
                 // TODO: スクロール速度が上昇する
                 break;
+            default:
+                break;
             }
-            // カーソルの移動系以外の操作だった場合
-            // カーソルの状態を更新するのは必須なので
-            CursorStatus.UpdateFrame();
-
-        CursorUpdateCompleted:  // カーソルの状態を更新したらここに来る
-
+            // カーソルの状態を更新する
+            CursorStatus = CursorStatus.Update(userOperation);
 
             //==============================スクロールする==============================
             // スクロール待機中なら、待機フレーム数を１減らしてスクロールしない
@@ -246,7 +243,42 @@ namespace PanelDePon.PlayArea
             }
 
             //==============================セルの状態を更新する==============================
-            // TODO: セルの状態を更新する
+            /* ・更新順序
+             * 1. セルの状態更新
+             * 2. 今回のフレームで入れ替わる
+             *    (入れ替え or 落下。入れ替わったセルは SwapArray の対応した場所にインデックスが入る)
+             * 3. セルの消滅、変身
+             *    * 消滅セルを検査する
+             *    * 変身するお邪魔セルを検査する
+             *    * 消滅、変身するセルの状態をセットする
+             */
+            //======================セルの状態更新
+            //========全てのセルを更新
+            for(int row = 0; row < CellArray.Row; row++) {
+                for(int col = 0; col < CellArray.Column; col++) {
+                    var cell = CellArray[row, col];
+                    cell.Update();
+                    _cellArray[row, col] = cell;
+                }
+            }
+            //==========セルの落下
+            for(int row = 1; row < CellArray.Row; row++) {
+                for(int col = 0; col < CellArray.Column; col++) {
+                    // TODO: お邪魔の落下
+
+                    // 自分のセルが Not(種類:ノーマル or 状態:Free)
+                    if(!CellArray[row, col].CellType.IsNomal() || CellArray[row, col].Status is not CellState.Free)
+                        continue;
+
+                    var bottomCell = CellArray[row - 1, col];
+                    // 下のセルが 種類:空 かつ 状態:Free
+                    if(bottomCell.CellType is CellType.Empty && bottomCell.Status is CellState.Free) {
+                        // 自分と下のセルを入れ替えて、落下を起こす
+                        SwapCell(row, col, row - 1, col, isSwap: false);
+                    }
+                }
+            }
+            //==========================セルの消滅、変身
             int flashTime = 10;     // セルがフラッシュし続けるフレーム数
             int momentTime = 2;     // セルが消滅変身するアニメーションに掛かる時間
 
@@ -262,15 +294,6 @@ namespace PanelDePon.PlayArea
             for(int col = 0; col < searchAry.Column; col++)
                 Serch(res:ref searchAry, func:funcCol, beforeCell:CellInfo.Empty, chain:0, new Matrix(0, col));
 
-            //Debug.WriteLine("消滅セル検査");
-            //Debug.WriteLine(searchAry.Count(b => b));
-            //for(int row = searchAry.Row - 1; row >= 0; row--) {
-            //    for(int col = 0; col < searchAry.Column; col++) {
-            //        if(searchAry[row, col]) Debug.Write("1,");
-            //        else Debug.Write("2,");
-            //    }
-            //    Debug.WriteLine("");
-            //}
 
             // TODO: 変身するお邪魔セル走査
 
@@ -293,48 +316,7 @@ namespace PanelDePon.PlayArea
                     cnt++;
                 }
             }
-            //for(int i=0; i<listC.Count; i++) {
-            //    var cell = listC[i].Item3;
-            //    // 状態遷移タイマーのセット
-            //    cell.StateTimer = (flashTime, i * momentTime + 2, (listC.Count - i) * momentTime);
-            //    // セルの状態をフラッシュに
-            //    cell.Status = CellState.Flash;
-            //    _cellArray[listC[i].row, listC[i].col] = cell;
-            //}
 
-            // セルの落下
-            for(int row = 1; row < CellArray.Row; row++) {
-                for(int col=0; col<CellArray.Column; col++) {
-                    // TODO: お邪魔の落下
-
-                    // 自分のセルが、ノーマル かつ Free
-                    if(!CellArray[row, col].CellType.IsNomal() || CellArray[row, col].Status is not CellState.Free)
-                        continue;
-
-                    var cell = CellArray[row - 1, col];
-                    // 下の座標のセルが 空 かつ Free
-                    if(cell.CellType is CellType.Empty && cell.Status is CellState.Free) {
-                        // 自分と、下のセルを入れ替えて、落下を表現
-                        SwapCell(row, col, row - 1, col, isSwap: false);
-                        //swapList.Add(mat);
-                    }
-                }
-            }
-
-            // 全てのセルを更新
-            for(int row = 0; row < CellArray.Row; row++) {
-                for(int col=0; col<CellArray.Column; col++) {
-                    var cell = CellArray[row, col];
-                    // このフレームで移動してないセルだけ、更新する
-                    if(SwapArray[row, col] is Matrix swap) {  // セルが移動した
-                        //cell.Update(swap);
-                        //_cellArray[row, col] = cell;
-                    } else {                                // セルを普通に更新する
-                        cell.Update();
-                        _cellArray[row, col] = cell;
-                    }
-                }
-            }
         }
         /// <summary>
         ///   繋がっているかを検査する

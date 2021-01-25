@@ -45,7 +45,7 @@ namespace PanelDePon_WPF.Services
 
         public PanelDePonPlayAreaServie()
         {
-            this._playArea = new PlayArea(12, 12);
+            this._playArea = new PlayArea(12, 6);
             this.Updated += (_, _) => ScrollPer = (_playArea.ScrollLine / _playArea.BorderLine);
         }
 

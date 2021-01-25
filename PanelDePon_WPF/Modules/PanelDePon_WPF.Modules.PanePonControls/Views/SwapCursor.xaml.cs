@@ -37,7 +37,7 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         public void Update()
         {
             if(!Matrix.Equals(_playAreaService.CursorStatus.CursorPos))
-                Matrix = _playAreaService.CursorStatus.CursorPos;
+                Move(_playAreaService.CursorStatus.CursorPos);
         }
     }
 }
