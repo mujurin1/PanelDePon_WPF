@@ -23,7 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PanelDePon", "PanelDePon", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PanelDePon.Types", "PanelDePon\PanelDePon.Types\PanelDePon.Types.csproj", "{08D34CBE-8D55-4F8A-BCEE-8AB72F60E923}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PanelDePon_WPF.Modules.PanePonControls", "PanelDePon_WPF\Modules\PanelDePon_WPF.Modules.PanePonControls\PanelDePon_WPF.Modules.PanePonControls.csproj", "{CA35F0BD-33FD-4A50-BFD8-BB65688FDE91}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PanelDePon_WPF.Modules.PanePonControls", "PanelDePon_WPF\Modules\PanelDePon_WPF.Modules.PanePonControls\PanelDePon_WPF.Modules.PanePonControls.csproj", "{CA35F0BD-33FD-4A50-BFD8-BB65688FDE91}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

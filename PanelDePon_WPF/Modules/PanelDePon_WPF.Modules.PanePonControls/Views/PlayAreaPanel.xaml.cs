@@ -87,12 +87,10 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             // 画面サイズ変更
             Width = 30 * PlayAreaSerivce.PlayAreaSize.Column;
             Height = 30 * PlayAreaSerivce.PlayAreaSize.Row;
-            Debug.WriteLine(Width);
-            Debug.WriteLine(Height);
 
             // カーソルの初期化
             CursorCanvas.Children.Clear();
-            this._cursor = new SwapCursor(_playAreaSerivce, PlayAreaSerivce.CursorStatus.CursorPos);
+            this._cursor = new SwapCursor(_playAreaSerivce, PlayAreaSerivce.CursorStatus.Matrix);
             CursorCanvas.Children.Add(_cursor);
             // 表示セルの初期化
             // TODO: お邪魔セルを表示させる（今はお邪魔はやってない
@@ -110,14 +108,14 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         {
             // ===============================スクロールの更新
             if(_playAreaSerivce.ScrollLine == 0) {      // ちょうどせり上がった
-                // キャンバス内のコントロールを１段上に上げる
-                // カーソル
-                _cursor.Move(new(_cursor.Matrix.Row+1, _cursor.Matrix.Column), isAnimation:false);
-                // セル
-                foreach(var ctrl in CellCanvas.Children) {
-                    var cell = ctrl as PlayAreaControlAbs;
-                    cell.Move(new(cell.Matrix.Row+1, cell.Matrix.Column), isAnimation:false);
-                }
+                //// キャンバス内のコントロールを１段上に上げる
+                //// カーソル
+                //_cursor.Move(new(_cursor.Matrix.Row+1, _cursor.Matrix.Column), isAnimation:false);
+                //// セル
+                //foreach(var ctrl in CellCanvas.Children) {
+                //    var cell = ctrl as PlayAreaControlAbs;
+                //    cell.Move(new(cell.Matrix.Row+1, cell.Matrix.Column), isAnimation:false);
+                //}
                 
                 // 一番下に、新しくセルを生成する
                 foreach(var cell in CreatePazzleCellColumn(row:-1))
@@ -146,9 +144,6 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             foreach(var cell in removeCells) {
                 CellCanvas.Children.Remove(cell);
             }
-
-            // カーソルの更新 ホントは最大でも片方しか動かないけど、これでいいや
-            _cursor.Move(PlayAreaSerivce.CursorStatus.CursorPos);
         }
 
         /// <summary>

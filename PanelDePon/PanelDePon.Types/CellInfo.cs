@@ -23,8 +23,22 @@ namespace PanelDePon.Types
                         .Select(e => (int)e)
                         .Where(n => (n & 0x10) == 0x10).Count();
 
-        /// <summary>セルの状態遷移に使うタイマー</summary>
-        public (int Flash, int Neutral, int Lock) StateTimer;
+        private (int Flash, int Neutral, int Lock) _stateTimer;
+        /// <summary>
+        ///   <para>セルの状態遷移に使うタイマー</para>
+        ///   <para>Lock にセットした時間は TransitionTime にも入る</para>
+        /// </summary>
+        public (int Flash, int Neutral, int Lock) StateTimer {
+            get => _stateTimer;
+            set {
+                _stateTimer = value;
+                TransitionTime = value.Lock;
+            }
+        }
+        /// <summary>
+        ///   移動に掛かる時間
+        /// </summary>
+        public double TransitionTime { get; private set; }
 
         /// <summary>セルの種類</summary>
         public CellType CellType;
@@ -52,7 +66,8 @@ namespace PanelDePon.Types
         private CellInfo(CellType type)
         {
             this.ID = 0;
-            this.StateTimer = (0, 0, 0);
+            this._stateTimer = (0, 0, 0);
+            this.TransitionTime = 0;
             this.CellType = type;
             this.Status = CellState.Free;
             this.WaitFrame = 0;
@@ -61,13 +76,13 @@ namespace PanelDePon.Types
         // アップデートは２種類
         // 入れ替わった   セル自体の更新はしない
         // それ以外       セル自体の更新
-        
+
         /// <summary>
         ///   １フレーム経過
         /// </summary>
-        public void Update()
+        public CellInfo Update()
         {
-            if(Status is CellState.Free && CellType is CellType.Empty) return;
+            if(Status is CellState.Free && CellType is CellType.Empty) return this;
             /* [下のSwitch文について]
              * セルの状態を時間経過で遷移させるためのもの
              * _timer に入っている数値の意味は
@@ -92,15 +107,15 @@ namespace PanelDePon.Types
             // 数値１～５は実行順序
             switch(StateTimer) {
             case ( > 0, > 0, > 0):              // １　　Status：Flash
-                if(--StateTimer.Flash == 0)
+                if(--_stateTimer.Flash == 0)
                     Status = CellState.Neutral;
                 break;
 
             case (0, > 0, > 0):                 // ２　　Status：Neutral or Moment
-                if(--StateTimer.Neutral == 0) {
+                if(--_stateTimer.Neutral == 0) {
                     if(Status is CellState.Neutral) {   // 2.1　Status：Neutral
                         Status = CellState.Moment;
-                        StateTimer.Neutral = 1;             // 　　NeutralTimerを再セット。次はケース２→分岐で４に入る
+                        _stateTimer.Neutral = 1;             // 　　NeutralTimerを再セット。次はケース２→分岐で４に入る
                     } else {                            // 2.2　Status：Moment
                         Status = CellState.Lock;
                         if(CellType.IsNomal()) {            // 通常orびっくりセル
@@ -113,10 +128,11 @@ namespace PanelDePon.Types
                 break;
 
             case (0, 0, > 0):                   // ３　State：Lock
-                if(--StateTimer.Lock == 0)
+                if(--_stateTimer.Lock == 0)
                     Status = CellState.Free;
-            break;
+                break;
             }
+            return this;
         }
 
         private static readonly Random _random = new Random();

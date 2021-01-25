@@ -37,6 +37,8 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         }
         /// <summary>このセルはもう表示しない。消してくれ</summary>
         public bool IsRemove { get; private set; } = false;
+        /// <summary>セルの移動方向  -1:静止 0:上 1:左 2:右 3:下</summary>
+        private int _direction = -1;
 
         public PazzleCell(IPanelDePonPlayAreaService playAreaService, Matrix matrix) : base(playAreaService, matrix)
         {
@@ -82,15 +84,55 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         /// <remarks>お邪魔から、お邪魔顔セルになったときに、生成するセルのエリアを返す</remarks>
         public Matrix? Update()
         {
-            // もし対応したセルが移動していた場合ずれているので、調べる
-            // 移動していたら
-            if(_playAreaService.SwapArray[Matrix] is Matrix matrix) {
-                Move(matrix);
-                CellInfo = _playAreaService.CellArray[Matrix];
-                Moji.Text = $"動{CellInfo.StateTimer.Lock}";
-                return null;
+            // スクロール
+            if(_playAreaService.ScrollPer == 0) {
+                var m = Matrix;
+                m.Row++;
+                Matrix = m;
             }
 
+            // もし対応したセルが移動していたら移動方向を調べる
+            if(_playAreaService.SwapArray[Matrix] is Matrix matrix) {
+                //this.Matrix = matrix;
+                //CellInfo = _playAreaService.CellArray[Matrix];
+                //Moji.Text = $"動{CellInfo.StateTimer.Lock}";
+                //Canvas.SetBottom(this, matrix.Row * CellSize + CellInfo.TransitionTime / CellInfo.StateTimer.Lock);
+                //Canvas.SetLeft(this, matrix.Row * CellSize + CellInfo.TransitionTime / CellInfo.StateTimer.Lock);
+                //return null;
+                switch((matrix.Row-Matrix.Row, matrix.Column - Matrix.Column)) {
+                case (0, -1):   // 左方向
+                    _direction = 1; break;
+                case (0, 1):    // 右方向
+                    _direction = 2; break;
+                case (-1, 0):   // 下方向
+                    _direction = 3; break;
+                default:        // 上方向
+                    throw new Exception($"上方向への移動はありえません  new:{(matrix)}  old:{Matrix}");
+                }
+                this.Matrix = matrix;
+            }
+
+            // ちょっと、やだけど、毎回位置を指定し直そう
+            if(CellInfo.StateTimer.Lock == 0 || _direction == -1) {
+                _direction = -1;
+                Canvas.SetLeft(this, Matrix.Column * CellSize);
+                Canvas.SetBottom(this, Matrix.Row * CellSize);
+            } else {
+                switch(_direction) {
+                case (1):   // 左
+                    Canvas.SetLeft(this,
+                        Matrix.Column * CellSize + CellSize * (CellInfo.StateTimer.Lock / CellInfo.TransitionTime));
+                    break;
+                case (2):   // 右
+                    Canvas.SetLeft(this,
+                        Matrix.Column * CellSize - CellSize * (CellInfo.StateTimer.Lock / CellInfo.TransitionTime));
+                    break;
+                case (3):   // 下
+                    Canvas.SetBottom(this,
+                        Matrix.Row * CellSize + CellSize * (CellInfo.StateTimer.Lock / CellInfo.TransitionTime));
+                    break;
+                }
+            }
 
             /* ・更新内容
              * * セルの移動
@@ -112,7 +154,8 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             case (CellState.Lock):      // 移動 or 消滅変身後待機
                 if(CellInfo.CellType is CellType.Empty) {           // 種類：空     普通のセルが消滅した
                     Moji.Text = $"消{CellInfo.StateTimer.Lock}";
-                } else if(CellInfo.CellType.IsNomal()) {            // 種類：普通   お邪魔が普通のセルになった or 落下中
+                } else if(CellInfo.CellType.IsNomal()) {            // 種類：普通   お邪魔が普通のセルになった
+
                     Moji.Text = $"動{CellInfo.StateTimer.Lock}";
                     // TODO: 見た目を普通のセルに
                 } else {

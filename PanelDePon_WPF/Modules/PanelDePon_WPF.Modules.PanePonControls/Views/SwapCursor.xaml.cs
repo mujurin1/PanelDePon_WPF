@@ -36,8 +36,12 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
 
         public void Update()
         {
-            if(!Matrix.Equals(_playAreaService.CursorStatus.CursorPos))
-                Move(_playAreaService.CursorStatus.CursorPos);
+            if(!Matrix.Equals(_playAreaService.CursorStatus.Matrix)) {
+                Debug.WriteLine("移動した");
+                Matrix = _playAreaService.CursorStatus.Matrix;
+                Canvas.SetBottom(this, CellSize * Matrix.Row);
+                Canvas.SetLeft(this, CellSize * Matrix.Column);
+            }
         }
     }
 }

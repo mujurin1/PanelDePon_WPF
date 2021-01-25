@@ -20,7 +20,7 @@ namespace PanelDePon.Types
         ///   <para>カーソルの位置（左側）</para>
         ///   <para>左下が row:0 col:0 で右上に行くほど増加</para>
         /// </summary>
-        public MatrixRange CursorPos;
+        public MatrixRange Matrix;
         /// <summary>
         ///   <para>この値が０なら、カーソルの操作や入れ替えができる</para>
         ///   <para>０でないなら１フレーム毎にマイナス１</para>
@@ -31,7 +31,7 @@ namespace PanelDePon.Types
         public CursorStatus(Matrix playAreaSize)
         {
             this.PlayAreaSize = playAreaSize;
-            this.CursorPos = new MatrixRange(playAreaSize);
+            this.Matrix = new MatrixRange(playAreaSize);
             this.CursorWait = 0;
         }
 
@@ -71,10 +71,10 @@ namespace PanelDePon.Types
 
         private void CursorMove(int row, int column)
         {
-            var matrix = CursorPos;
+            var matrix = Matrix;
             matrix.Row += row;
             matrix.Column += column;
-            CursorPos = matrix;
+            Matrix = matrix;
         }
     }
 }

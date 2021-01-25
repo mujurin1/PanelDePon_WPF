@@ -12,7 +12,8 @@ namespace PanelDePon.PlayArea
         /// <summary>
         ///   セルの入れ替えに掛かる時間
         /// </summary>
-        private static int swapTime = 5;
+        private int swapTime = 5;
+        private int fallTime = 10;
 
         /// <summary>
         ///   <para>セルの情報を格納した配列</para>
@@ -92,8 +93,8 @@ namespace PanelDePon.PlayArea
         {
             // カーソル位置を初期化
             var cursor = CursorStatus;
-            cursor.CursorPos.Row = 0;
-            cursor.CursorPos.Column = 0;
+            cursor.Matrix.Row = 0;
+            cursor.Matrix.Column = 0;
             CursorStatus = cursor;
             // セルの配置を初期化する
             _cellArray = CellArray.CopyAndReset(CellInfo.Empty);
@@ -160,7 +161,7 @@ namespace PanelDePon.PlayArea
         }
 
         /* プレイエリアのセルの処理とか
-         * １．操作
+         * １．ユーザーの操作
          * ２．スクロールする（しないときもある）
          *     　ここでせり上がる時に一番上にセルがあればゲームオーバー
          * ３．左下から、右に、上に向かって、セルの状態変化（移動/変化）
@@ -179,8 +180,8 @@ namespace PanelDePon.PlayArea
             switch(userOperation) {
             case UserOperation.Swap:      // カーソルの位置のセルを入れ替える
                 // カーソルの位置のセルを取得
-                var cursorCellL = CellArray[CursorStatus.CursorPos.Row, CursorStatus.CursorPos.Column];
-                var cursorCellR = CellArray[CursorStatus.CursorPos.Row, CursorStatus.CursorPos.Column + 1];
+                var cursorCellL = CellArray[CursorStatus.Matrix.Row, CursorStatus.Matrix.Column];
+                var cursorCellR = CellArray[CursorStatus.Matrix.Row, CursorStatus.Matrix.Column + 1];
 
                 // 両方Emptyなら入れ替える必要がないので入れ替えない
                 if(cursorCellL.CellType is CellType.Empty && cursorCellR.CellType is CellType.Empty)
@@ -189,8 +190,8 @@ namespace PanelDePon.PlayArea
                 // カーソル位置のセルのどちらも移動可能
                 if(cursorCellL.CellType.IsNomal() && cursorCellL.Status is CellState.Free &&
                    cursorCellR.CellType.IsNomal() && cursorCellR.Status is CellState.Free) {
-                    SwapCell(CursorStatus.CursorPos.Row, CursorStatus.CursorPos.Column,
-                             CursorStatus.CursorPos.Row, CursorStatus.CursorPos.Column + 1);
+                    SwapCell(CursorStatus.Matrix.Row, CursorStatus.Matrix.Column,
+                             CursorStatus.Matrix.Row, CursorStatus.Matrix.Column + 1);
                     // 入れ替わりリストに追加
                     //swapList.Add(mat);
                 }
@@ -220,18 +221,17 @@ namespace PanelDePon.PlayArea
                 // ScrollLine が BorderLine を超えているか？（１段上に上げるか？）
                 if(ScrollLine >= BorderLine) {
                     ScrollLine = 0;
-                    int row;
                     // セルを１段上に上げる
-                    for(row = PlayAreaSize.Row - 2; row >= -1; row--) {
+                    for(var row = PlayAreaSize.Row - 2; row >= -1; row--) {
                         for(var col = 0; col < PlayAreaSize.Column; col++) {
                             _cellArray[row + 1, col] = CellArray[row, col];
                         }
                     }
                     // カーソルを１段上に上げる
                     var cr = CursorStatus;
-                    var mr = cr.CursorPos;
+                    var mr = cr.Matrix;
                     mr.Row++;   // ホントはここがしたいだけ
-                    cr.CursorPos = mr;
+                    cr.Matrix = mr;
                     CursorStatus = cr;
                     // 一番下（Row-1）のセルをランダムに追加する
                     for(int col = 0; col < PlayAreaSize.Column; col++) {
@@ -367,11 +367,11 @@ namespace PanelDePon.PlayArea
             // 空のセルでなければ状態をLockに
             if(cell.CellType is not CellType.Empty) {
                 cell.Status = CellState.Lock;
-                cell.StateTimer = (0, 0, swapTime);
+                cell.StateTimer = (0, 0, isSwap ? swapTime : fallTime);
             }
             if(swapCell.CellType is not CellType.Empty) {
                 swapCell.Status = CellState.Lock;
-                swapCell.StateTimer = (0, 0, swapTime);
+                swapCell.StateTimer = (0, 0, isSwap ? swapTime : fallTime);
             }
             // 移動（入れ替え
             _cellArray[row, col] = swapCell;

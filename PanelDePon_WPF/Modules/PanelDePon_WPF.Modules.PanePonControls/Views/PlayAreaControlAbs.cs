@@ -30,7 +30,7 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         /// <summary>セルのサイズ</summary>
         public int CellSize = 30;
         /// <summary>自分の存在位置。Matrix上</summary>
-        public Matrix Matrix { get; private set; }
+        public Matrix Matrix { get; protected set; }
 
         //public double CanvasLeft {
         //    get => Canvas.GetLeft(this);
@@ -58,72 +58,56 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             Canvas.SetLeft(this, Matrix.Column * CellSize);
         }
 
-        /// <summary>
-        ///   セルの表示位置を動かす
-        /// </summary>
-        /// <param name="matrix">移動先</param>
-        /// <param name="isAnimation">アニメーションする(true)かどうか</param>
-        public void Move(Matrix matrix, bool isAnimation = true)
-        {
-            if(isAnimation)
-                MoveAnimation(left: (matrix.Column - Matrix.Column) * CellSize,
-                              bottom: (matrix.Row - Matrix.Row) * CellSize);
-            else {
-                Canvas.SetBottom(this, matrix.Row * CellSize);
-            }
-            Matrix = matrix;
-        }
+        ///// <summary>
+        /////   <para>自分の位置をCanvas座標で動かす</para>
+        /////   <para>Left,Bottom が同時に動くことはないので、両方値が入っている場合Leftを動かす</para>
+        ///// </summary>
+        ///// <param name="left"></param>
+        ///// <param name="bottom"></param>
+        //protected void MoveAnimation(double left = 0, double bottom = 0)
+        //{
+        //    (string, double) animeInfo = (left, bottom) switch {
+        //        (0, 0) => (null, double.NaN),       // 移動量なし
+        //        (_, 0) => ("(Canvas.Left)", left),
+        //        (0, _) => ("(Canvas.Bottom)", bottom),
+        //        _ => throw new Exception($"PazzleCell Animation: Left, Bottom の値が不正です\nLeft {left}  Bottom {bottom}")  // NaNのまま進むとアニメーションで例外になるので
+        //    };
 
-        /// <summary>
-        ///   <para>自分の位置をCanvas座標で動かす</para>
-        ///   <para>Left,Bottom が同時に動くことはないので、両方値が入っている場合Leftを動かす</para>
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="bottom"></param>
-        protected void MoveAnimation(double left = 0, double bottom = 0)
-        {
-            (string, double) animeInfo = (left, bottom) switch {
-                (0, 0) => (null, double.NaN),       // 移動量なし
-                (_, 0) => ("(Canvas.Left)", left),
-                (0, _) => ("(Canvas.Bottom)", bottom),
-                _ => throw new Exception($"PazzleCell Animation: Left, Bottom の値が不正です\nLeft {left}  Bottom {bottom}")  // NaNのまま進むとアニメーションで例外になるので
-            };
+        //    // 移動量なし
+        //    if(animeInfo.Item1 is null) return;
+        //    // このアニメーションのストーリーは初めて
+        //    if(!_moveSBCache.TryGetValue(animeInfo, out Storyboard storyboard)) {
+        //        // ストーリーボード作成
+        //        storyboard = new Storyboard();
+        //        storyboard.Children.Add(
+        //            CreateAnimation(this, animeInfo.Item1, animeInfo.Item2, AnimeSpeed));
+        //        // ストーリーボードをキャッシュに追加
+        //        _moveSBCache.Add(animeInfo, storyboard);
+        //    }
 
-            // 移動量なし
-            if(animeInfo.Item1 is null) return;
-            // このアニメーションのストーリーは初めて
-            if(!_moveSBCache.TryGetValue(animeInfo, out Storyboard storyboard)) {
-                // ストーリーボード作成
-                storyboard = new Storyboard();
-                storyboard.Children.Add(
-                    CreateAnimation(this, animeInfo.Item1, animeInfo.Item2, AnimeSpeed));
-                // ストーリーボードをキャッシュに追加
-                _moveSBCache.Add(animeInfo, storyboard);
-            }
+        //    // アニメーションを開始します
+        //    storyboard.Begin();
+        //}
 
-            // アニメーションを開始します
-            storyboard.Begin();
-        }
+        ///// <summary>
+        /////   DoubleAnimation を生成して返す簡易メソッド
+        ///// </summary>
+        ///// <param name="target">アニメーションする対象</param>
+        ///// <param name="propertyPath">アニメーションさせるプロパティ名</param>
+        ///// <param name="value">移動量</param>
+        ///// <param name="time">アニメーション時間</param>
+        ///// <returns></returns>
+        //protected static DoubleAnimation CreateAnimation(DependencyObject target, string propertyPath, double value, TimeSpan time)
+        //{
+        //    var anime = new DoubleAnimation();
+        //    // TargetName添付プロパティではなく、Target添付プロパティで
+        //    // 直接アニメーションのターゲットを指定しています。
+        //    Storyboard.SetTarget(anime, target);
+        //    Storyboard.SetTargetProperty(anime, new PropertyPath(propertyPath));
+        //    anime.By = value;
+        //    anime.Duration = time;
 
-        /// <summary>
-        ///   DoubleAnimation を生成して返す簡易メソッド
-        /// </summary>
-        /// <param name="target">アニメーションする対象</param>
-        /// <param name="propertyPath">アニメーションさせるプロパティ名</param>
-        /// <param name="value">移動量</param>
-        /// <param name="time">アニメーション時間</param>
-        /// <returns></returns>
-        protected static DoubleAnimation CreateAnimation(DependencyObject target, string propertyPath, double value, TimeSpan time)
-        {
-            var anime = new DoubleAnimation();
-            // TargetName添付プロパティではなく、Target添付プロパティで
-            // 直接アニメーションのターゲットを指定しています。
-            Storyboard.SetTarget(anime, target);
-            Storyboard.SetTargetProperty(anime, new PropertyPath(propertyPath));
-            anime.By = value;
-            anime.Duration = time;
-
-            return anime;
-        }
+        //    return anime;
+        //}
     }
 }
