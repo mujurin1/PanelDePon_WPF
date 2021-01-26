@@ -29,12 +29,15 @@ namespace PanelDePon_WPF.Services
         public double BorderLine { get; private set; }
         /// <summary>スクロールしてる割合</summary>
         public double ScrollPer { get; private set; }
+        public bool PushedUp { get; private set; }
         /// <summary>カーソルの状態</summary>
         public CursorStatus _cursorStatus;
         public CursorStatus CursorStatus => _cursorStatus;
         /// <summary>CellArray に対応した、移動したセルの移動先</summary>
         public RectangleArray<Matrix?> _swapArray;
         public RectangleArray<Matrix?> SwapArray => _swapArray;
+        /// <summary>ゲームオーバーしたかどうか</summary>
+        public bool IsGameOver { get; private set; } = false;
 
         /// <summary>プレイエリアの更新が全て終了した時に呼ばれる</summary>
         public event EventHandler Updated;
@@ -60,7 +63,7 @@ namespace PanelDePon_WPF.Services
 
         /// <summary>プレイエリアを１フレーム分更新する</summary>
         /// <param name="userOperation">ユーザーの操作</param>
-        public void UpdateFrame(UserOperation userOperation)
+        public void InputKey(UserOperation userOperation)
         {
             // 更新時の最初の処理  フレーム１増加
             ElapseFrame++;
@@ -86,7 +89,7 @@ namespace PanelDePon_WPF.Services
             _cursorStatus = CursorStatus.Update(userOperation);
             // スクロール
             ScrollLine += 2;        // スクロールする
-            if(ScrollLine >= BorderLine) {    // ちょうど１段スクロールした
+            if(PushedUp = ScrollLine >= BorderLine) {    // ちょうど１段スクロールした
                 ScrollLine = 0;     // スクロールラインを戻す
                 s++;
                 // 全てのセルを１段上げる

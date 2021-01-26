@@ -32,18 +32,6 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         /// <summary>自分の存在位置。Matrix上</summary>
         public Matrix Matrix { get; protected set; }
 
-        //public double CanvasLeft {
-        //    get => Canvas.GetLeft(this);
-        //    set {
-        //        Animation(left: value - Canvas.GetLeft(this));
-        //    }
-        //}
-        //public double CanvasBottom {
-        //    get => Canvas.GetBottom(this);
-        //    set {
-        //        Animation(bottom: value - Canvas.GetBottom(this));
-        //    }
-        //}
 
         /// <summary>
         ///   必ず、PlayAreaControlAbs(Matrix) の方を呼べ

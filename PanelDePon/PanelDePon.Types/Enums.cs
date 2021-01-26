@@ -25,7 +25,7 @@ namespace PanelDePon.Types
         Green     = 0x14,   // 20
         // びっくりマークのセル！
         // もしこのセルを消すなら、CellType.csの33行目辺りにあると思われる、NormalCellTypes　を訂正してね
-        Bikkuri   = 0x1F,   // 31
+        Bikkuri   = 0x15,   // 21
         // お邪魔セル
         Ojama     = 0x01,   // 1
         // ハードお邪魔セル

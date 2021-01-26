@@ -9,5 +9,5 @@
              xmlns:viewmodels="clr-namespace:PanelDePon_WPF.Modules.ModuleName.ViewModels"
              xmlns:views="clr-namespace:PanelDePon_WPF.Modules.PanePonControls.Views;assembly=PanelDePon_WPF.Modules.PanePonControls"
              prism:ViewModelLocator.AutoWireViewModel="True">
-  <views:PlayAreaPanel PlayAreaSerivce="{Binding PanePonService.Value}" Background="RosyBrown"/>
+  <views:PlayAreaPanel PlayAreaService="{Binding PanePonService.Value}" Background="RosyBrown"/>
 </UserControl>

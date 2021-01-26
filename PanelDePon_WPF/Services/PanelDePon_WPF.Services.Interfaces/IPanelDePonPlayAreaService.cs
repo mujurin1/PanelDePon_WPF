@@ -27,15 +27,16 @@ namespace PanelDePon_WPF.Services.Interfaces
         double BorderLine { get; }
         /// <summary>スクロールしてる割合</summary>
         double ScrollPer { get; }
+        /// <summary>今回の更新で下に新しいセルが追加された</summary>
+        bool PushedUp { get; }
         /// <summary>カーソルの状態</summary>
         CursorStatus CursorStatus { get; }
         /// <summary>CellArray に対応した、移動したセルの移動先</summary>
         RectangleArray<Matrix?> SwapArray { get; }
-
-
-        /// <summary>プレイエリアを１フレーム分更新する</summary>
-        /// <param name="userOperation">ユーザーの操作</param>
-        void UpdateFrame(UserOperation userOperation);
+        /// <summary>ゲームオーバーしたかどうか</summary>
+        bool IsGameOver { get; }
+        /// <summary>キー入力を渡す</summary>
+        void InputKey(UserOperation userOperation);
 
         /// <summary>プレイエリアの更新が全て終了した時に呼ばれる</summary>
         event EventHandler Updated;

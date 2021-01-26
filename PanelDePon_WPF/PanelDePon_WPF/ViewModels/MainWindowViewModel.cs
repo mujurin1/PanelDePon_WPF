@@ -46,7 +46,7 @@ namespace PanelDePon_WPF.ViewModels
                 "SpeedUp" => UserOperation.ScrollSpeedUp,
                 _ => UserOperation.NaN,
             };
-            _panePonService.UpdateFrame(input);
+            _panePonService.InputKey(input);
         }
     }
 }

@@ -9,11 +9,16 @@ namespace PanelDePon.PlayArea
 {
     public class PlayArea
     {
-        /// <summary>
-        ///   セルの入れ替えに掛かる時間
-        /// </summary>
-        private int swapTime = 30;
-        private int fallTime = 10;
+        // セルのタイマーに使う値
+        /// <summary>入れ替え</summary>
+        private int swapTime = 10;
+        /// <summary>落下</summary>
+        private int fallTime = 20;
+        /// <summary>点滅</summary>
+        private int flashTime = 50;
+        /// <summary>消滅変身</summary>
+        private int momentTime = 10;
+
 
         /// <summary>
         ///   <para>セルの情報を格納した配列</para>
@@ -49,8 +54,10 @@ namespace PanelDePon.PlayArea
         public double ScrollSpeed { get; set; } = 2;      // てきとう
         /// <summary>せり上がっている今の高さ</summary>
         public double ScrollLine { get; private set; } = 0;
+        /// <summary>今回の更新で下に新しいセルが追加された</summary>
+        public bool PushedUp { get; private set; } = false;
         /// <summary>Border がこの値まで来たら、完全にセルが上に移動する</summary>
-        public readonly double BorderLine = 100;          // てきとう
+        public readonly double BorderLine = 1000;          // てきとう
 
         /// <summary>
         ///   カーソルの状態
@@ -81,7 +88,8 @@ namespace PanelDePon.PlayArea
             // 　　　　　　　一番下はせり上がる列なので更に＋１
             this._cellArray = new RectangleArray<CellInfo>((int)(row * 1.5) + 1, col);
             this._swapArray = new RectangleArray<Matrix?>(CellArray.Row, CellArray.Column);
-            this.CursorStatus = new CursorStatus(PlayAreaSize.Row, PlayAreaSize.Column - 1);
+            // カーソルは最上段に行けない
+            this.CursorStatus = new CursorStatus(PlayAreaSize.Row-1, PlayAreaSize.Column - 1);
             PlayAreaInit();
         }
 
@@ -168,6 +176,41 @@ namespace PanelDePon.PlayArea
             // 移動したセル配列の初期化
             _swapArray = SwapArray.CopyAndReset(null);
 
+            //==============================スクロールする==============================
+            // ScrollLine が BorderLine を超えているか？（１段上に上げるか？）
+            PushedUp = ScrollLine >= BorderLine;
+            // スクロール待機中なら、待機フレーム数を１減らしてスクロールしない
+            if(_scrollWaitFrame > 0) {
+                _scrollWaitFrame--;
+            } else {
+                // ゲームオーバーか？
+                if(GameOverJudge()) {
+                    return;
+                }
+                // スクロールする
+                ScrollLine += ScrollSpeed;
+                if(PushedUp) {
+                    ScrollLine = 0;
+                    // セルを１段上に上げる
+                    for(var row = PlayAreaSize.Row - 2; row >= -1; row--) {
+                        for(var col = 0; col < PlayAreaSize.Column; col++) {
+                            _cellArray[row + 1, col] = CellArray[row, col];
+                        }
+                    }
+                    // カーソルを１段上に上げる
+                    var cr = CursorStatus;
+                    var mr = cr.Matrix;
+                    mr.Row++;   // ホントはここがしたいだけ
+                    cr.Matrix = mr;
+                    CursorStatus = cr;
+                    // 一番下（Row-1）のセルをランダムに追加する
+                    for(int col = 0; col < PlayAreaSize.Column; col++) {
+                        var cell = CellArray[-1, col];
+                        cell.CellType = CellInfo.RandomCellType(n: 0);
+                        _cellArray[-1, col] = cell;
+                    }
+                }
+            }
             //==============================ユーザーの操作==============================
             switch(userOperation) {
             case UserOperation.Swap:      // カーソルの位置のセルを入れ替える
@@ -195,43 +238,6 @@ namespace PanelDePon.PlayArea
             // カーソルの状態を更新する
             CursorStatus = CursorStatus.Update(userOperation);
 
-            //==============================スクロールする==============================
-            // スクロール待機中なら、待機フレーム数を１減らしてスクロールしない
-            if(_scrollWaitFrame > 0) {
-                _scrollWaitFrame--;
-            } else {
-                // スクロールする
-                ScrollLine += ScrollSpeed;
-                // ゲームオーバーか？
-                if(GameOverJudge()) {
-                    // TODO: ゲームオーバー
-                    IsGameOver = true;
-                    return;
-                }
-                // ScrollLine が BorderLine を超えているか？（１段上に上げるか？）
-                if(ScrollLine >= BorderLine) {
-                    ScrollLine = 0;
-                    // セルを１段上に上げる
-                    // 最上段は動かさない 最上段が動く == ゲームオーバーなので
-                    for(var row = PlayAreaSize.Row - 2; row >= -1; row--) {
-                        for(var col = 0; col < PlayAreaSize.Column; col++) {
-                            _cellArray[row + 1, col] = CellArray[row, col];
-                        }
-                    }
-                    // カーソルを１段上に上げる
-                    var cr = CursorStatus;
-                    var mr = cr.Matrix;
-                    mr.Row++;   // ホントはここがしたいだけ
-                    cr.Matrix = mr;
-                    CursorStatus = cr;
-                    // 一番下（Row-1）のセルをランダムに追加する
-                    for(int col = 0; col < PlayAreaSize.Column; col++) {
-                        var cell = CellArray[-1, col];
-                        cell.CellType = CellInfo.RandomCellType(n: 0);
-                        _cellArray[-1, col] = cell;
-                    }
-                }
-            }
 
             //==============================セルの状態を更新する==============================
             /* ・更新順序
@@ -270,9 +276,6 @@ namespace PanelDePon.PlayArea
                 }
             }
             //==========================セルの消滅、変身
-            int flashTime = 10;     // セルがフラッシュし続けるフレーム数
-            int momentTime = 2;     // セルが消滅変身するアニメーションに掛かる時間
-
             var listD = new List<(int row, int col, CellInfo)>();   // お邪魔。変身するセルを格納する
 
             var searchAry = new RectangleArray<bool>(PlayAreaSize);
@@ -376,7 +379,12 @@ namespace PanelDePon.PlayArea
         /// </summary>
         private bool GameOverJudge()
         {
-            return false;
+            // TODO: ゲームオーバー
+            for(int col = 0; col < PlayAreaSize.Column; col++) {
+                if(CellArray[PlayAreaSize.Row - 1, col].CellType is not CellType.Empty)
+                    return IsGameOver = true;
+            }
+            return IsGameOver = false;
         }
     }
 }
