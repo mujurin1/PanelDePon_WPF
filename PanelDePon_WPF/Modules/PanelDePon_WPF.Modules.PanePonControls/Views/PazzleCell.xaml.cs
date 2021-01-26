@@ -86,6 +86,9 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         {
             // スクロール
             if(_playAreaService.ScrollPer == 0) {
+                if(_direction.time > 0) {
+                    Debug.WriteLine("移動中のスクロール");
+                }
                 var m = Matrix;
                 m.Row++;
                 Matrix = m;
@@ -93,25 +96,27 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
 
             // もし対応したセルが移動していたら移動方向を調べる
             if(_playAreaService.SwapArray[Matrix] is Matrix matrix) {
-                // 自分が表示するセルの情報を取得
+                // 古い情報を保管して、移動させる
+                var old = Matrix;
+                this.Matrix = matrix;
+                // セルの情報を取得
                 CellInfo = _playAreaService.CellArray[matrix];
 
-                var old = Matrix;
-                switch((matrix.Row-Matrix.Row, matrix.Column - Matrix.Column)) {
+                // 移動量時間の値を Lock-1 にする。移動の始まりと終わりが正しくなる
+                switch((Matrix.Row- old.Row, Matrix.Column - old.Column)) {
                 case (0, -1):   // 左方向
-                    _direction = (1, CellInfo.StateTimer.Lock); break;
+                    _direction = (1, CellInfo.StateTimer.Lock - 1); break;
                 case (0, 1):    // 右方向
-                    _direction = (2, CellInfo.StateTimer.Lock); break;
+                    _direction = (2, CellInfo.StateTimer.Lock - 1); break;
                 case (-1, 0):   // 下方向
-                    _direction = (3, CellInfo.StateTimer.Lock); break;
+                    _direction = (3, CellInfo.StateTimer.Lock - 1); break;
                 default:        // 上方向
-                    throw new Exception($"上方向への移動はありえません  new:{(matrix)}  old:{Matrix}");
+                    throw new Exception($"上方向への移動はありえません  new:{(Matrix)}  old:{old}");
                 }
-                this.Matrix = matrix;
             } else  // 移動して無くても情報を更新
                 CellInfo = _playAreaService.CellArray[Matrix];
 
-            // ちょっと、やだけど、毎回位置を指定し直そう
+            // ちょっと、やだけど、たとえ移動してなくても毎回位置を指定し直そう
             if(_direction.time is 0) {
                 Canvas.SetLeft(this, Matrix.Column * CellSize);
                 Canvas.SetBottom(this, Matrix.Row * CellSize);
