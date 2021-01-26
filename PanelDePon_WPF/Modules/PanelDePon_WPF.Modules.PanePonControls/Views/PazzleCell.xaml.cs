@@ -26,19 +26,12 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
     /// </summary>
     public partial class PazzleCell : PlayAreaControlAbs
     {
-        private CellInfo _cell;
         /// <summary>表示するセルの情報</summary>
-        public CellInfo CellInfo {
-            get => _cell;
-            private set {
-                _cell = value;
-                CellInit();
-            }
-        }
+        public CellInfo CellInfo { get; private set; }
         /// <summary>このセルはもう表示しない。消してくれ</summary>
         public bool IsRemove { get; private set; } = false;
         /// <summary>セルの移動方向  -1:静止 0:上 1:左 2:右 3:下</summary>
-        private (int dir, int time) _direction = (-1, 0);
+        private (int dir, int time) _direction = (-1, -1);
 
         public PazzleCell(IPanelDePonPlayAreaService playAreaService, Matrix matrix) : base(playAreaService, matrix)
         {
@@ -46,6 +39,7 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             this.BorderBrush = Brushes.Black;
             this.BorderThickness = new Thickness(1);
             this.CellInfo = _playAreaService.CellArray[matrix];
+            CellInit();
         }
 
         /// <summary>
@@ -80,7 +74,6 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         /// <summary>
         ///   表示の更新。自分が表示するセルの情報で更新する
         /// </summary>
-        /// <param name="cellInfo">表示するセルの情報</param>
         /// <remarks>お邪魔から、お邪魔顔セルになったときに、生成するセルのエリアを返す</remarks>
         public Matrix? Update()
         {
@@ -99,7 +92,7 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
                 // 古い情報を保管して、移動させる
                 var old = Matrix;
                 this.Matrix = matrix;
-                // セルの情報を取得
+                // セルの情報を更新
                 CellInfo = _playAreaService.CellArray[matrix];
 
                 // 移動量時間の値を Lock-1 にする。移動の始まりと終わりが正しくなる
@@ -116,10 +109,12 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             } else  // 移動して無くても情報を更新
                 CellInfo = _playAreaService.CellArray[Matrix];
 
-            // ちょっと、やだけど、たとえ移動してなくても毎回位置を指定し直そう
-            if(_direction.time is 0) {
-                Canvas.SetLeft(this, Matrix.Column * CellSize);
-                Canvas.SetBottom(this, Matrix.Row * CellSize);
+            // スクロールや、入れ替え直後の落下で表示がずれるので、
+            // 位置を指定し直す
+            Canvas.SetBottom(this, Matrix.Row * CellSize);
+            Canvas.SetLeft(this, Matrix.Column * CellSize);
+            if(_direction.time is -1) {
+                
             } else {
                 switch(_direction.dir) {
                 case (1):   // 左
@@ -142,7 +137,6 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
              * * セルの移動
              * * セルの点滅・顔・消滅変身
              */
-            // アップデート内容：セルの点滅・顔・消滅
             switch(CellInfo.Status) {
             case (CellState.Free):      // 自分の表示を削除 or 何もしない
                 if(CellInfo.CellType is CellType.Empty) {

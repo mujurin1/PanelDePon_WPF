@@ -12,7 +12,7 @@ namespace PanelDePon.PlayArea
         /// <summary>
         ///   セルの入れ替えに掛かる時間
         /// </summary>
-        private int swapTime = 5;
+        private int swapTime = 30;
         private int fallTime = 10;
 
         /// <summary>
@@ -212,6 +212,7 @@ namespace PanelDePon.PlayArea
                 if(ScrollLine >= BorderLine) {
                     ScrollLine = 0;
                     // セルを１段上に上げる
+                    // 最上段は動かさない 最上段が動く == ゲームオーバーなので
                     for(var row = PlayAreaSize.Row - 2; row >= -1; row--) {
                         for(var col = 0; col < PlayAreaSize.Column; col++) {
                             _cellArray[row + 1, col] = CellArray[row, col];
@@ -354,12 +355,10 @@ namespace PanelDePon.PlayArea
             // セルインフォの取得
             var cell = CellArray[row, col];
             var swapCell = CellArray[swapRow, swapCol];
-            // 空のセルでなければ状態をLockに
-            if(cell.CellType is not CellType.Empty) {
-                cell.Status = CellState.Lock;
-                cell.StateTimer = (0, 0, isSwap ? swapTime : fallTime);
-            }
-            if(swapCell.CellType is not CellType.Empty) {
+            // 空のセルでも状態をLockにしろ！ただし落下は違う
+            cell.Status = CellState.Lock;
+            cell.StateTimer = (0, 0, isSwap ? swapTime : fallTime);
+            if(isSwap) {
                 swapCell.Status = CellState.Lock;
                 swapCell.StateTimer = (0, 0, isSwap ? swapTime : fallTime);
             }
