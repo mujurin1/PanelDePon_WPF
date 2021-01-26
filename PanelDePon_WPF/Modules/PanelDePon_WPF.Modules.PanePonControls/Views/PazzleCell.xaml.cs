@@ -31,7 +31,7 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         /// <summary>このセルはもう表示しない。消してくれ</summary>
         public bool IsRemove { get; private set; } = false;
         /// <summary>セルの移動方向  -1:静止 0:上 1:左 2:右 3:下</summary>
-        private (int dir, int time) _direction = (-1, -1);
+        private (int dir, int time) _direction = (-1, 0);
 
         public PazzleCell(IPanelDePonPlayAreaService playAreaService, Matrix matrix) : base(playAreaService, matrix)
         {
@@ -95,14 +95,14 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
                 // セルの情報を更新
                 CellInfo = _playAreaService.CellArray[matrix];
 
-                // 移動量時間の値を Lock-1 にする。移動の始まりと終わりが正しくなる
+                // 移動量と移動時間を設定
                 switch((Matrix.Row- old.Row, Matrix.Column - old.Column)) {
                 case (0, -1):   // 左方向
-                    _direction = (1, CellInfo.StateTimer.Lock - 1); break;
+                    _direction = (1, CellInfo.StateTimer.Lock); break;
                 case (0, 1):    // 右方向
-                    _direction = (2, CellInfo.StateTimer.Lock - 1); break;
+                    _direction = (2, CellInfo.StateTimer.Lock); break;
                 case (-1, 0):   // 下方向
-                    _direction = (3, CellInfo.StateTimer.Lock - 1); break;
+                    _direction = (3, CellInfo.StateTimer.Lock); break;
                 default:        // 上方向
                     throw new Exception($"上方向への移動はありえません  new:{(Matrix)}  old:{old}");
                 }
@@ -113,7 +113,7 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
             // 位置を指定し直す
             Canvas.SetBottom(this, Matrix.Row * CellSize);
             Canvas.SetLeft(this, Matrix.Column * CellSize);
-            if(_direction.time is -1) {
+            if(_direction.time is 0) {
                 
             } else {
                 switch(_direction.dir) {
