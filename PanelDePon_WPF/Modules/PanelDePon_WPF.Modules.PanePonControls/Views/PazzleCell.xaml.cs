@@ -49,26 +49,15 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         {
             Width = CellSize;
             Height = CellSize;
-            switch(CellInfo.CellType) {
-            case CellType.Red:
-                this.Background = Brushes.Red;
-                break;
-            case CellType.Blue:
-                this.Background = Brushes.Blue;
-                break;
-            case CellType.Sky:
-                this.Background = Brushes.SkyBlue;
-                break;
-            case CellType.Yellow:
-                this.Background = Brushes.Yellow;
-                break;
-            case CellType.Green:
-                this.Background = Brushes.Green;
-                break;
-            case CellType.Bikkuri:
-                this.Background = Brushes.Silver;
-                break;
-            }
+            this.Background = CellInfo.CellType switch {
+                CellType.Red => Brushes.Red,
+                CellType.Blue => Brushes.Blue,
+                CellType.Sky => Brushes.SkyBlue,
+                CellType.Yellow => Brushes.Yellow,
+                CellType.Green => Brushes.Green,
+                CellType.Bikkuri => Brushes.Silver,
+                _ => throw new Exception($"非対応セル Type: {CellInfo.CellType}")
+            };
         }
 
         /// <summary>
@@ -79,9 +68,6 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
         {
             // スクロール
             if(_playAreaService.ScrollPer == 0) {
-                if(_direction.time > 0) {
-                    Debug.WriteLine("移動中のスクロール");
-                }
                 var m = Matrix;
                 m.Row++;
                 Matrix = m;
@@ -94,44 +80,35 @@ namespace PanelDePon_WPF.Modules.PanePonControls.Views
                 this.Matrix = matrix;
                 // セルの情報を更新
                 CellInfo = _playAreaService.CellArray[matrix];
-
                 // 移動量と移動時間を設定
-                switch((Matrix.Row- old.Row, Matrix.Column - old.Column)) {
-                case (0, -1):   // 左方向
-                    _direction = (1, CellInfo.StateTimer.Lock); break;
-                case (0, 1):    // 右方向
-                    _direction = (2, CellInfo.StateTimer.Lock); break;
-                case (-1, 0):   // 下方向
-                    _direction = (3, CellInfo.StateTimer.Lock); break;
-                default:        // 上方向
-                    throw new Exception($"上方向への移動はありえません  new:{(Matrix)}  old:{old}");
-                }
+                _direction.time = CellInfo.StateTimer.Lock;
+                _direction.dir = (Matrix.Row - old.Row, Matrix.Column - old.Column) switch {
+                    (0, -1) => 1,   // 左方向
+                    (0, 1) => 2,    // 右方向
+                    (-1, 0) => 3,   // 下方向
+                    _ => throw new Exception($"変な方向への移動 new:{(Matrix)}  old:{old}"),
+                };
             } else  // 移動して無くても情報を更新
                 CellInfo = _playAreaService.CellArray[Matrix];
 
-            // スクロールや、入れ替え直後の落下で表示がずれるので、
-            // 位置を指定し直す
-            Canvas.SetBottom(this, Matrix.Row * CellSize);
-            Canvas.SetLeft(this, Matrix.Column * CellSize);
-            if(_direction.time is 0) {
-                
-            } else {
-                switch(_direction.dir) {
-                case (1):   // 左
-                    Canvas.SetLeft(this,
-                        Matrix.Column * CellSize + CellSize * (CellInfo.StateTimer.Lock / CellInfo.TransitionTime));
-                    break;
-                case (2):   // 右
-                    Canvas.SetLeft(this,
-                        Matrix.Column * CellSize - CellSize * (CellInfo.StateTimer.Lock / CellInfo.TransitionTime));
-                    break;
-                case (3):   // 下
-                    Canvas.SetBottom(this,
-                        Matrix.Row * CellSize + CellSize * (CellInfo.StateTimer.Lock / CellInfo.TransitionTime));
-                    break;
-                }
+            // セルの位置の設定、初期値
+            double bottom = Matrix.Row * CellSize;
+            double left = Matrix.Column * CellSize;
+            // セルが移動していたら移動位置を変える
+            if(_direction.time is > 0) {
+                // セルの現在の移動割合
+                double directionPer = CellSize * CellInfo.StateTimer.Lock / CellInfo.TransitionTime;
+                (bottom, left) = _direction.dir switch {
+                    1 => (bottom, left + directionPer),     // 左方向
+                    2 => (bottom, left - directionPer),     // 右方向
+                    3 => (bottom + directionPer, left),     // 下方向
+                    _ => throw new Exception("警告対策"),
+                };
                 _direction.time--;
             }
+            // セルを移動させる
+            Canvas.SetBottom(this, bottom);
+            Canvas.SetLeft(this, left);
 
             /* ・更新内容
              * * セルの移動
